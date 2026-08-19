@@ -1,0 +1,159 @@
+"""The fleet orchestrator — runtime-agnostic (the coordinator's real logic).
+
+Chains: get offers (live scout OR replay fixtures) -> ToS gate -> deterministic
+valuation + spend gate -> worth-it (real Routes, or frozen drive in replay) ->
+presenter. Reliable by design: Python owns the maths and the gates; the LLM agents
+only normalise (scout) and phrase (presenter). Returns the brief + the audit trail.
+
+A runtime (Cloud Run job, etc.) just calls run_fleet(); it holds no platform code.
+"""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+
+from agents.scouts import scout_ozbargain
+from agents.presenter import presenter
+from agents.valuer import compute_stack_value
+from agents.worth_it import worth_it_verdict, errand_cost
+from guardrails.gates import gate_tos, gate_spend, record, clear_audit, audit_trail, GateDenied
+from schemas.offer import ActionItem
+from config.settings import settings
+
+_FIX = Path(__file__).resolve().parent.parent / "fixtures"
+
+# Household's known local stores (live path: merchant -> a representative store).
+# In prod this is the stock scout's job; a small directory is honest for the demo.
+STORE_DIRECTORY = {
+    "coles": (-27.5514, 153.0888),
+    "woolworths": (-27.5386, 153.0731),
+    "big w": (-27.5514, 153.0888),
+    "bigw": (-27.5514, 153.0888),
+}
+
+
+def _store_for(merchant: str):
+    m = (merchant or "").lower()
+    for name, coords in STORE_DIRECTORY.items():
+        if name in m:
+            return coords
+    return None
+
+
+def _json_array(text: str):
+    text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
+    i, j = text.find("["), text.rfind("]")
+    return json.loads(text[i:j + 1]) if i != -1 and j != -1 else json.loads(text)
+
+
+async def _run_agent(agent, app: str, text: str) -> str:
+    runner = InMemoryRunner(agent=agent, app_name=app)
+    s = await runner.session_service.create_session(app_name=app, user_id="fleet")
+    msg = types.Content(role="user", parts=[types.Part(text=text)])
+    final = ""
+    async for ev in runner.run_async(user_id="fleet", session_id=s.id, new_message=msg):
+        if ev.is_final_response() and ev.content and ev.content.parts:
+            final = "".join(p.text or "" for p in ev.content.parts)
+    return final
+
+
+async def _get_offers(replay: bool) -> list[dict]:
+    if replay:
+        return json.loads((_FIX / "replay_offers.json").read_text())["offers"]
+    scouted = _json_array(await _run_agent(
+        scout_ozbargain, "fleet-scout", "Scout OzBargain for loyalty-points offers now."))
+    for o in scouted:
+        coords = _store_for(o.get("merchant", ""))
+        if coords:
+            o["store_lat"], o["store_lng"] = coords
+    return scouted
+
+
+def _value(o: dict, cap: float) -> dict:
+    """Deterministic valuation; size a cheap collectible buy to the weekly cap."""
+    price = o.get("price_aud") or 0.0
+    if o.get("points_out"):
+        per = compute_stack_value(price, o["points_out"], o.get("program", "none"), o.get("multipliers"))
+        units = max(1, int(cap // price)) if price else 1
+        return {"value_aud": round(per["net_value_aud"] * units, 2),
+                "cents_per_point": per["cost_cents_per_point"],
+                "units": units, "total_points": per["total_points"] * units,
+                "spend_aud": round(price * units, 2)}
+    return {"value_aud": o.get("est_value_aud", 0.0), "cents_per_point": None,
+            "units": 1, "total_points": 0, "spend_aud": price}
+
+
+def _drive(o: dict):
+    if "drive" in o:
+        return o["drive"]
+    if "store_lat" in o and "store_lng" in o:
+        try:
+            t = errand_cost(o["store_lat"], o["store_lng"])
+            return {"minutes": t["minutes"], "km": t["km"]}
+        except Exception:
+            return None
+    return None
+
+
+async def run_fleet(replay: bool = True) -> dict:
+    """Run the whole fleet once. Returns {brief: [ActionItem], assessed, audit,
+    excluded_tos, n_candidates}."""
+    clear_audit()
+    cap = settings.spend_cap_aud_per_week
+    offers = await _get_offers(replay)
+
+    assessed: list[dict] = []
+    excluded_tos = 0
+    for o in offers:
+        oid = o.get("id", "?")
+        # --- gate 1: ToS (violations never reach the brief) ---
+        try:
+            gate_tos(o.get("tos_risk", "none"), oid)
+        except GateDenied:
+            excluded_tos += 1
+            continue
+
+        val = _value(o, cap)
+
+        # --- gate 2: spend cap (sizing keeps spend <= cap; over-cap -> approval) ---
+        needs_approval = False
+        try:
+            gate_spend(val["spend_aud"], 0.0)
+        except GateDenied:
+            needs_approval = True
+
+        # --- worth-it: real drive economics (or frozen drive in replay) ---
+        drive = _drive(o)
+        if drive:
+            wv = worth_it_verdict(val["value_aud"], drive["minutes"], drive["km"])
+            verdict, net, trip_cost = wv["verdict"], wv["net_after_trip_aud"], wv["trip_cost_aud"]
+            tmin, tkm = drive["minutes"], drive["km"]
+        else:  # online / no known store -> no errand cost
+            verdict = "do_it" if val["value_aud"] > 0 else "skip"
+            net, trip_cost, tmin, tkm = val["value_aud"], 0.0, 0.0, 0.0
+        if needs_approval and verdict == "do_it":
+            verdict = "needs_approval"
+
+        ref = record("offer_assessed", offer=oid, verdict=verdict, net_value_aud=net)
+        assessed.append({
+            "id": oid, "merchant": o.get("merchant"), "item": o.get("item"),
+            "program": o.get("program", "none"), "cents_per_point": val["cents_per_point"],
+            "units": val["units"], "spend_aud": val["spend_aud"],
+            "total_points": val["total_points"], "offer_value_aud": val["value_aud"],
+            "trip_minutes": tmin, "trip_km": tkm, "trip_cost_aud": trip_cost,
+            "net_value_aud": net, "verdict": verdict,
+            "requires_instore": o.get("requires_instore", False),
+            "tos_risk": o.get("tos_risk", "none"), "weekly_cap_aud": cap,
+            "audit_ref": ref,
+        })
+
+    brief_raw = await _run_agent(presenter, "fleet-present",
+                                 "Compose the morning brief:\n" + json.dumps(assessed))
+    items = [ActionItem(**x) for x in _json_array(brief_raw)]
+    items.sort(key=lambda a: a.rank)
+    return {"brief": items, "assessed": assessed, "audit": audit_trail(),
+            "excluded_tos": excluded_tos, "n_candidates": len(offers)}

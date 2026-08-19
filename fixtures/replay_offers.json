@@ -38,6 +38,22 @@
       "store_lat": -27.6146,
       "store_lng": 152.7601,
       "drive": {"minutes": 72.0, "km": 68.7}
+    },
+    {
+      "id": "giftcard-exploit-2026",
+      "source": "manual",
+      "source_url": "https://example.com/demo-fixture",
+      "merchant": "Gift Card Portal",
+      "program": "none",
+      "offer_type": "discount_stack",
+      "item": "gift-card coupon-stacking loophole",
+      "price_aud": 0.0,
+      "points_out": 0,
+      "spend_required_aud": 0.0,
+      "multipliers": [],
+      "requires_instore": false,
+      "tos_risk": "violation",
+      "est_value_aud": 40.0
     }
   ]
 }

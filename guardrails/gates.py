@@ -34,6 +34,11 @@ def clear_audit() -> None:
     _AUDIT.clear()
 
 
+def record(event: str, **kw) -> str:
+    """Public audit hook for the orchestrator — logs an event, returns its audit_ref."""
+    return _log(event, **kw)
+
+
 class GateDenied(Exception):
     pass
 

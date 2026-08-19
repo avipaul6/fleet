@@ -26,7 +26,7 @@ net_value_aud descending (skips last). Each ActionItem:
                     Escalate a do_it to needs_approval if the action is GATED — the spend
                     exceeds the weekly cap, or a phone call / human sign-off is required.
   reasoning       : ONE honest sentence the human reads; for skips, name the trade-off.
-  audit_ref       : "audit:<id>"   (placeholder until Cloud Logging trace ids exist)
+  audit_ref       : echo the offer's provided audit_ref verbatim
 
 ALWAYS include refused errands — restraint is a feature, not a gap. Never invent offers.
 Emit ONLY the JSON array (no prose, no markdown fences).""",

@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     cards: list[str] = ["qantas_amex"]
     time_value_aud_per_hour: float = 60.0
     fuel_aud_per_km: float = 0.16
+    # Where the morning brief is emailed (hackathon: one recipient in config;
+    # later: per-user from the profile UI). Set DUCKFLEET_NOTIFY_EMAIL in .env.
+    notify_email: str = ""
 
     # --- Guardrails (hard limits, not suggestions) ---
     spend_cap_aud_per_week: float = 100.0
