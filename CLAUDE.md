@@ -122,7 +122,9 @@ duckfleet/
     managed_agents/  # Claude Managed Agents (later, optional)
   config/            # settings via env
   deploy/            # Cloud Run / Scheduler / Pub/Sub
-  CLAUDE.md  README.md  PLAN.md  DEMO_SCRIPT.md  LICENSE  .gitignore
+  demo/gcp-hackathon/  # DEMO_SCRIPT.md, PLAN.md — hackathon-specific material
+  devlog/            # dated build log + design rationale (kept out of README)
+  CLAUDE.md  README.md  LICENSE  .gitignore
 ```
 
 ## Out of scope (state this in README — scoping is judged)

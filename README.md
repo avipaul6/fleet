@@ -49,7 +49,7 @@ drive and *asking permission* before dialling.
 
 ---
 
-## Model switching (the bit you asked for)
+## Model switching
 
 Every agent takes its model from config, resolved by `agents/model_factory.py`:
 
@@ -60,13 +60,13 @@ Every agent takes its model from config, resolved by `agents/model_factory.py`:
 
 ```bash
 export DUCKFLEET_MODEL_FAST="gemini-3.5-flash"
-export DUCKFLEET_MODEL_STRONG="gemini-3.5-pro"
+export DUCKFLEET_MODEL_STRONG="gemini-2.5-pro"
 # swap the valuer to Claude on Vertex for an eval run:
 export DUCKFLEET_MODEL_STRONG="vertex_ai/claude-sonnet-4-5"
 ```
 
-For the hackathon submission keep Gemini as the configured default (it's their party);
-the switchability itself is a talking point — you can show eval results across models.
+Gemini is the configured default. Design rationale and model-choice notes live in
+[`devlog/`](devlog/).
 
 ---
 
@@ -89,8 +89,9 @@ agents/          fleet definitions + tools
 schemas/         Offer / StockSignal / ActionItem (Pydantic, the contract)
 guardrails/      gates, caps, call policy, audit
 evals/           failure-mode harness (duck-hoarding, ToS, rogue-call)
+fixtures/        seeded offers incl. the hero "duck" stack (powers replay)
 config/          settings via env
 deploy/          Cloud Run / Scheduler / Pub/Sub setup
-DEMO_SCRIPT.md   3-minute video beat sheet
-PLAN.md          2.5-week build cut
+demo/            how to see it working (gcp-hackathon/: DEMO_SCRIPT, PLAN)
+devlog/          dated build log + design rationale
 ```
