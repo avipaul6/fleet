@@ -1,6 +1,6 @@
 """The contract every scout must emit. Locking this early is 80% of the build."""
-from datetime import datetime
-from pydantic import BaseModel
+from datetime import datetime, timezone
+from pydantic import BaseModel, Field
 from typing import Literal
 
 
@@ -9,7 +9,8 @@ class Offer(BaseModel):
     source: Literal["pointhacks", "ozbargain", "everyday_rewards", "flybuys", "manual"]
     source_url: str
     merchant: str
-    program: Literal["qantas_ff", "velocity", "flybuys", "everyday_rewards"]
+    # "none" = a strong stackable deal that earns no specific scheme on its own
+    program: Literal["qantas_ff", "velocity", "flybuys", "everyday_rewards", "none"]
     offer_type: Literal["bonus_points", "multiplier", "discount_stack", "collectible"]
     item: str | None = None            # "rubber duck", "ooshie"
     price_aud: float | None = None
@@ -17,7 +18,7 @@ class Offer(BaseModel):
     spend_required_aud: float | None = None
     stackable_with: list[str] = []     # other offer ids
     expiry: datetime | None = None
-    scraped_at: datetime
+    scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     requires_instore: bool = False
     tos_risk: Literal["none", "grey", "violation"] = "none"  # valuer sets this
 

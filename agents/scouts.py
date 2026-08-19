@@ -34,10 +34,39 @@ then emit ONLY a JSON array of Offer objects matching the provided schema.
 Never invent offers. If a field is unknown, use null. Mark anything that smells
 like ToS abuse (mass account creation, coupon exploits) with tos_risk."""
 
+OZB_SCOUT_INSTRUCTION = """You are DuckFleet's OzBargain scout. The user chases loyalty
+points across these programs: qantas_ff, velocity, flybuys, everyday_rewards.
+
+STEP 1 — call fetch_ozbargain_deals() to get raw live deals (each has: id, title,
+merchant, merchant_url, node_url, price_aud, categories, program_hint, requires-instore
+cues in the title, votes).
+
+STEP 2 — KEEP only deals with a plausible points angle: a program_hint is set, OR the
+merchant earns a scheme (Coles->flybuys, Woolworths/BigW->everyday_rewards), OR it's a
+credit-card / frequent-flyer / bonus-points offer, OR a strong stackable discount at a
+points-earning retailer. DROP generic bargains with no points angle.
+
+STEP 3 — emit ONLY a JSON array (no prose, no markdown fences) of Offer objects:
+  id           = the deal id (string)
+  source       = "ozbargain"
+  source_url    = merchant_url if present, else node_url
+  merchant     = the merchant
+  program      = program_hint if set; else infer from categories/title; else "none"
+  offer_type   = one of bonus_points | multiplier | discount_stack | collectible (closest fit)
+  item         = short item name, or null
+  price_aud    = the price, or null
+  points_out   = points earned ONLY if the deal states it, else null
+  spend_required_aud = minimum spend if stated, else null
+  stackable_with = []
+  requires_instore = true if the title implies in-store / C&C / limited stores
+  tos_risk     = "grey" if it leans on coupon-stacking / multi-account / repeated
+                 redemption; "violation" if clearly breaching T&Cs; else "none"
+Never invent deals. If nothing qualifies, output []."""
+
 scout_ozbargain = Agent(
     name="scout_ozbargain",
     model=model_factory.fast(),
-    instruction=SCOUT_INSTRUCTION,
+    instruction=OZB_SCOUT_INSTRUCTION,
     tools=[fetch_ozbargain_deals],
     output_key="offers_ozbargain",
 )
