@@ -1,0 +1,15 @@
+# Keep the image small + secrets out. Runtime needs: agents, schemas, guardrails,
+# config, fixtures, runtimes, requirements.txt.
+.venv/
+.git/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+adk_apps/
+scripts/
+demo/
+devlog/
+*.md
+.DS_Store

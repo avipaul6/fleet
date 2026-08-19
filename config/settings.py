@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     # later: per-user from the profile UI). Set DUCKFLEET_NOTIFY_EMAIL in .env.
     notify_email: str = ""
 
+    # Gmail send credentials — read ONLY from env / Secret Manager, NEVER hardcoded
+    # or committed. Get a refresh token once via scripts/gmail_authorize.py.
+    gmail_sender: str = ""          # e.g. duckfleet.dev@gmail.com (blank -> "me")
+    gmail_client_id: str = ""
+    gmail_client_secret: str = ""
+    gmail_refresh_token: str = ""
+
     # --- Guardrails (hard limits, not suggestions) ---
     spend_cap_aud_per_week: float = 100.0
     max_calls_per_store_per_day: int = 1
