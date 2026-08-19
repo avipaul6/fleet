@@ -29,6 +29,6 @@ Send via Gmail API tool.""",
 )
 
 root_agent = SequentialAgent(
-    name="pointsduck",
+    name="duckfleet",
     sub_agents=[scout_fleet, valuer, worth_it, caller, presenter],
 )

@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timezone
 from config.settings import settings
 
-audit = logging.getLogger("pointsduck.audit")  # -> Cloud Logging in prod
+audit = logging.getLogger("duckfleet.audit")  # -> Cloud Logging in prod
 
 
 def _log(event: str, **kw):
