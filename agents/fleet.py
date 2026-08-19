@@ -23,6 +23,7 @@ from agents.worth_it import worth_it_verdict, errand_cost
 from guardrails.gates import gate_tos, gate_spend, record, clear_audit, audit_trail, GateDenied
 from schemas.offer import ActionItem
 from config.settings import settings
+from agents import history
 
 _FIX = Path(__file__).resolve().parent.parent / "fixtures"
 
@@ -151,9 +152,13 @@ async def run_fleet(replay: bool = True) -> dict:
             "audit_ref": ref,
         })
 
+    # append this run's offers to BigQuery history (best-effort; never blocks the brief)
+    history_rows = history.record_run(assessed, "replay" if replay else "live")
+
     brief_raw = await _run_agent(presenter, "fleet-present",
                                  "Compose the morning brief:\n" + json.dumps(assessed))
     items = [ActionItem(**x) for x in _json_array(brief_raw)]
     items.sort(key=lambda a: a.rank)
     return {"brief": items, "assessed": assessed, "audit": audit_trail(),
-            "excluded_tos": excluded_tos, "n_candidates": len(offers)}
+            "excluded_tos": excluded_tos, "n_candidates": len(offers),
+            "history_rows": history_rows}

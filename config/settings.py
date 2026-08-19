@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     # --- GCP ---
     project_id: str = "your-gcp-project"
     region: str = "us-central1"
+    # Set (e.g. "duckfleet") to append each run's offers to BigQuery offer_history.
+    # Empty = disabled (best-effort sink; never blocks the brief).
+    bigquery_dataset: str = ""
 
     # --- Model tiers (THE SWITCH) ---
     # Plain string -> native Gemini via ADK.
