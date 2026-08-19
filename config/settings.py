@@ -5,14 +5,14 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # --- GCP ---
     project_id: str = "your-gcp-project"
-    region: str = "australia-southeast1"
+    region: str = "us-central1"
 
     # --- Model tiers (THE SWITCH) ---
     # Plain string -> native Gemini via ADK.
     # "vertex_ai/..." or "litellm/..." prefix -> LiteLlm wrapper (e.g. Claude on
     # Vertex AI Model Garden). Still 100% inside GCP.
     model_fast: str = "gemini-3.5-flash"      # scouts, worth-it, presenter
-    model_strong: str = "gemini-3.5-pro"      # coordinator, valuer, caller
+    model_strong: str = "gemini-2.5-pro"      # coordinator, valuer, caller
 
     # --- Household profile (hackathon: hardcode, don't build OAuth) ---
     home_lat: float = -27.5236   # Tarragindi-ish; set yours

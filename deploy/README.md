@@ -14,7 +14,7 @@
 ## Commands (sketch)
 ```bash
 gcloud run deploy duckfleet-orchestrator \
-  --source . --region australia-southeast1 \
+  --source . --region us-central1 \
   --set-env-vars-file env.yaml --no-allow-unauthenticated
 
 gcloud pubsub topics create scout-jobs
