@@ -12,11 +12,14 @@ REDEMPTION_VALUE_CPP = {"qantas_ff": 1.8, "velocity": 1.7, "flybuys": 0.5,
                         "everyday_rewards": 0.5}
 
 
-def compute_stack_value(price_aud: float, points_out: int, program: str,
-                        multipliers: list[float]) -> dict:
+def compute_stack_value(price_aud: float, points_out: int = 0, program: str = "none",
+                        multipliers: list[float] | None = None) -> dict:
     """Tool: deterministic stack math. The LLM finds the stack; python does
-    the arithmetic (never let the model do the maths it can delegate)."""
-    total_points = points_out
+    the arithmetic (never let the model do the maths it can delegate).
+    points_out = points from the offer itself; multipliers = program/card boosts
+    applied on the same purchase (e.g. [10.0, 2.0])."""
+    multipliers = multipliers or []
+    total_points = int(points_out or 0)
     for m in multipliers:
         total_points = int(total_points * m)
     cpp_cost = (price_aud / total_points) * 100 if total_points else float("inf")
@@ -32,13 +35,23 @@ def compute_stack_value(price_aud: float, points_out: int, program: str,
 valuer = Agent(
     name="valuer",
     model=model_factory.strong(),
-    instruction="""You are a points-value analyst. Given normalised Offers:
-1. Detect stacks: sale price x card multiplier x program boost on the SAME purchase.
-2. Call compute_stack_value for every candidate — never do arithmetic yourself.
-3. Set tos_risk: 'grey' for anything relying on repeated-redemption loopholes,
-   'violation' for anything breaching program T&Cs. Be conservative.
-4. Rank by net_value_aud and emit JSON. A stack under 1.0c/pt for Qantas is
-   duck-tier: flag it loudly.""",
+    instruction="""You are DuckFleet's points-value analyst. You are given a JSON array of
+offers; each may include `points_out` (points from the offer) and a `multipliers` array
+(program/card boosts that stack on the same purchase).
+
+For EACH offer:
+1. If it has a points angle (points_out > 0), call compute_stack_value(price_aud,
+   points_out, program, multipliers) — NEVER do the arithmetic yourself.
+2. If it has no points angle (no points_out and no multipliers), do NOT invent numbers —
+   mark it "no_points_angle" with null value fields.
+3. Set tos_risk conservatively: 'grey' for repeated-redemption / multi-account loopholes,
+   'violation' for T&C breaches, else 'none'.
+
+Emit ONLY a JSON array (no prose, no markdown fences), ranked by net_value_aud descending
+(no_points_angle offers last). Each element:
+  {id, merchant, program, total_points, cost_cents_per_point, net_value_aud,
+   value_multiple, tos_risk, note}
+In `note`, call out duck-tier finds loudly (a Qantas stack under ~1c/point is a duck).""",
     tools=[compute_stack_value],
     output_key="valued_offers",
 )

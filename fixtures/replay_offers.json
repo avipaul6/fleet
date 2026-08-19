@@ -1,0 +1,43 @@
+{
+  "_comment": "Deterministic replay set -> a known-good morning brief. Powers the demo/video and eval tests. Drive times are captured from real Routes API measurements once, then frozen so replay needs no live calls.",
+  "weekly_spend_cap_aud": 100,
+  "offers": [
+    {
+      "id": "bigw-duck-2026",
+      "source": "manual",
+      "source_url": "https://example.com/demo-fixture",
+      "merchant": "BigW Mt Gravatt",
+      "program": "qantas_ff",
+      "offer_type": "collectible",
+      "item": "rubber duck",
+      "price_aud": 3.50,
+      "points_out": 30,
+      "spend_required_aud": 3.50,
+      "multipliers": [10.0, 2.0],
+      "requires_instore": true,
+      "tos_risk": "none",
+      "store_lat": -27.5514,
+      "store_lng": 153.0888,
+      "drive": {"minutes": 27.4, "km": 15.8}
+    },
+    {
+      "id": "ooshie-far-2026",
+      "source": "manual",
+      "source_url": "https://example.com/demo-fixture",
+      "merchant": "Collectible @ Springfield",
+      "program": "none",
+      "offer_type": "collectible",
+      "item": "Ooshie 4-pack",
+      "price_aud": 6.00,
+      "points_out": 0,
+      "spend_required_aud": 6.00,
+      "multipliers": [],
+      "requires_instore": true,
+      "tos_risk": "none",
+      "est_value_aud": 6.00,
+      "store_lat": -27.6146,
+      "store_lng": 152.7601,
+      "drive": {"minutes": 72.0, "km": 68.7}
+    }
+  ]
+}
