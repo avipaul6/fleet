@@ -161,4 +161,4 @@ async def run_fleet(replay: bool = True) -> dict:
     items.sort(key=lambda a: a.rank)
     return {"brief": items, "assessed": assessed, "audit": audit_trail(),
             "excluded_tos": excluded_tos, "n_candidates": len(offers),
-            "history_rows": history_rows}
+            "history_rows": history_rows, "mode": "replay" if replay else "live"}

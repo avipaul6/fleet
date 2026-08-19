@@ -34,9 +34,8 @@ _load_env(ROOT / ".env")
 warnings.filterwarnings("ignore")
 logging.getLogger().setLevel(logging.ERROR)
 
-from agents.fleet import run_fleet  # noqa: E402
-
-ICON = {"do_it": "✅", "needs_approval": "⏳", "skip": "⛔"}
+from agents.fleet import run_fleet          # noqa: E402
+from agents.delivery import render_text      # noqa: E402
 
 
 async def main() -> None:
@@ -45,28 +44,14 @@ async def main() -> None:
     print(f"Running the fleet — {mode} ...\n")
     result = await run_fleet(replay=replay)
 
-    items = result["brief"]
-    n_do = sum(1 for a in items if a.verdict in ("do_it", "needs_approval"))
-    n_skip = sum(1 for a in items if a.verdict == "skip")
+    # exactly what the email will contain
+    print(render_text(result))
 
-    print("=" * 70)
-    print(f"🦆  DuckFleet — your hunt, {date.today():%-d %b %Y}")
-    print(f"    {result['n_candidates']} candidates · {n_do} to do · {n_skip} refused "
-          f"· {result['excluded_tos']} excluded (ToS)")
-    print("=" * 70)
-    for a in items:
-        cpp = f" · {a.cents_per_point}c/pt" if a.cents_per_point is not None else ""
-        print(f"\n {ICON.get(a.verdict, '•')}  #{a.rank}  {a.headline}")
-        print(f"        net ${a.net_value_aud:,.2f}{cpp} · {a.verdict.upper()}")
-        print(f"        {a.reasoning}")
-        print(f"        ↳ {a.audit_ref}")
-
-    print("\n" + "-" * 70)
+    print("\n" + "-" * 32)
     print("Governance receipts (audit trail):")
     for r in result["audit"]:
         extra = {k: v for k, v in r.items() if k not in ("ref", "event", "ts")}
         print(f"   • {r['event']:16} {extra if extra else ''}")
-    print("=" * 70 + "\n")
 
 
 if __name__ == "__main__":

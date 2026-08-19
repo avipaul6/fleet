@@ -25,21 +25,9 @@ if _envf.exists():
             _k, _v = _l.split("=", 1)
             os.environ.setdefault(_k.strip(), _v.strip())
 
-from agents.fleet import run_fleet                         # noqa: E402
-from agents.delivery import gmail_configured, send_brief    # noqa: E402
-from config.settings import settings                        # noqa: E402
-
-
-def _render_text(result: dict) -> str:
-    lines = [f"DuckFleet — your hunt, {date.today():%-d %b %Y}",
-             f"{result['n_candidates']} candidates · {result['excluded_tos']} excluded (ToS)", ""]
-    for a in result["brief"]:
-        cpp = f" · {a.cents_per_point}c/pt" if a.cents_per_point is not None else ""
-        lines += [f"#{a.rank} [{a.verdict.upper()}] {a.headline}",
-                  f"   net ${a.net_value_aud:,.2f}{cpp}",
-                  f"   {a.reasoning}",
-                  f"   audit: {a.audit_ref}", ""]
-    return "\n".join(lines)
+from agents.fleet import run_fleet                                      # noqa: E402
+from agents.delivery import gmail_configured, send_brief, render_text    # noqa: E402
+from config.settings import settings                                    # noqa: E402
 
 
 async def _main() -> None:
@@ -58,8 +46,8 @@ async def _main() -> None:
 
     # Deliver via Gmail if configured; otherwise say exactly what's missing (never silent).
     if gmail_configured():
-        subject = f"DuckFleet — your hunt, {date.today():%-d %b %Y}"
-        send_brief(subject, _render_text(result))
+        subject = f"🦆 DuckFleet — Daily Hunt, {date.today():%-d %b %Y}"
+        send_brief(subject, render_text(result))
         print(json.dumps({"event": "brief_emailed", "to": settings.notify_email}))
     else:
         missing = [name for name, val in [

@@ -33,10 +33,15 @@ for s in duckfleet-gmail-client-id duckfleet-gmail-client-secret duckfleet-gmail
   gcloud secrets add-iam-policy-binding "$s" --project "$PROJECT" \
     --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor -q >/dev/null
 done
+# BigQuery: write offer_history + run query/load jobs
+for role in roles/bigquery.dataEditor roles/bigquery.jobUser; do
+  gcloud projects add-iam-policy-binding "$PROJECT" \
+    --member="serviceAccount:$SA" --role="$role" --condition=None -q >/dev/null
+done
 
 echo "== Deploy Cloud Run Job (REPLAY=$REPLAY) =="
 gcloud run jobs deploy "$JOB" --source . --region "$REGION" --project "$PROJECT" \
-  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=$PROJECT,GOOGLE_CLOUD_LOCATION=global,DUCKFLEET_PROJECT_ID=$PROJECT,DUCKFLEET_REGION=$REGION,DUCKFLEET_MODEL_FAST=gemini-3.5-flash,DUCKFLEET_MODEL_STRONG=gemini-2.5-pro,DUCKFLEET_REPLAY=$REPLAY,DUCKFLEET_GMAIL_SENDER=$SENDER,DUCKFLEET_NOTIFY_EMAIL=$NOTIFY_EMAIL" \
+  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=$PROJECT,GOOGLE_CLOUD_LOCATION=global,DUCKFLEET_PROJECT_ID=$PROJECT,DUCKFLEET_REGION=$REGION,DUCKFLEET_MODEL_FAST=gemini-3.5-flash,DUCKFLEET_MODEL_STRONG=gemini-2.5-pro,DUCKFLEET_REPLAY=$REPLAY,DUCKFLEET_BIGQUERY_DATASET=duckfleet,DUCKFLEET_GMAIL_SENDER=$SENDER,DUCKFLEET_NOTIFY_EMAIL=$NOTIFY_EMAIL" \
   --set-secrets="DUCKFLEET_GMAIL_CLIENT_ID=duckfleet-gmail-client-id:latest,DUCKFLEET_GMAIL_CLIENT_SECRET=duckfleet-gmail-client-secret:latest,DUCKFLEET_GMAIL_REFRESH_TOKEN=duckfleet-gmail-refresh-token:latest"
 
 echo "== Smoke test: run once now =="
