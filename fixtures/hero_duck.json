@@ -1,0 +1,21 @@
+{
+  "_comment": "Guaranteed hero stack for the demo/video/evals. The $3.50 duck.",
+  "offer": {
+    "id": "bigw-duck-2026",
+    "source": "manual",
+    "source_url": "https://example.com/demo-fixture",
+    "merchant": "BigW",
+    "program": "qantas_ff",
+    "offer_type": "collectible",
+    "item": "rubber duck",
+    "price_aud": 3.50,
+    "points_out": 30,
+    "spend_required_aud": 3.50,
+    "stackable_with": ["everyday-boost-demo", "amex-multiplier-demo"],
+    "requires_instore": true,
+    "tos_risk": "none",
+    "scraped_at": "2026-08-19T02:00:00Z"
+  },
+  "multipliers": [10.0, 2.0],
+  "note": "price x program bonus x card multiplier -> ~0.59c/point. Buy 20 within cap."
+}
