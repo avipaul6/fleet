@@ -4,14 +4,17 @@ Hackathon cut: 2 live scrapers + 1 fixture-backed scout is plenty.
 Scrapers are read-only, rate-limited, robots.txt-respecting — say so in the video.
 """
 from google.adk.agents import Agent
-from agents import model_factory
+from agents import model_factory, ozbargain_feed
 from schemas.offer import Offer  # noqa: F401  (schema is the output contract)
 
 
-def fetch_ozbargain_deals(tag: str = "qantas") -> list[dict]:
-    """Tool: fetch + parse OzBargain deal feed for a tag. TODO: implement with
-    httpx + selectolax against the public RSS feed (stable, scrape-friendly)."""
-    raise NotImplementedError
+def fetch_ozbargain_deals(tag: str = "", limit: int = 40) -> list[dict]:
+    """Tool: fetch + parse the live OzBargain deal feed (read-only, rate-limited,
+    robots-respecting). `tag` narrows to /tag/<tag>/feed; empty = the main deals feed.
+    Returns raw deal dicts (id, title, merchant, price_aud, categories, program_hint,
+    …); the agent normalises these into Offer objects and filters to the user's
+    programs. Deterministic scrape logic lives in agents/ozbargain_feed.py."""
+    return ozbargain_feed.fetch_deals(tag=tag, limit=limit)
 
 
 def fetch_everyday_rewards_boosts() -> list[dict]:
