@@ -23,9 +23,12 @@ SA=$(gcloud iam service-accounts list --project "$PROJECT" \
       --format='value(email)' --filter='displayName:Compute Engine default')
 echo "Runtime service account: $SA"
 
-echo "== IAM: Vertex + Secret Manager access =="
+echo "== IAM: Vertex + Cloud Build + Secret Manager access =="
 gcloud projects add-iam-policy-binding "$PROJECT" \
   --member="serviceAccount:$SA" --role=roles/aiplatform.user --condition=None -q >/dev/null
+# New projects don't grant the default compute SA build rights; --source deploy needs it.
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member="serviceAccount:$SA" --role=roles/cloudbuild.builds.builder --condition=None -q >/dev/null
 for s in duckfleet-gmail-client-id duckfleet-gmail-client-secret duckfleet-gmail-refresh-token; do
   gcloud secrets add-iam-policy-binding "$s" --project "$PROJECT" \
     --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor -q >/dev/null
