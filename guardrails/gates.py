@@ -10,9 +10,28 @@ from config.settings import settings
 
 audit = logging.getLogger("duckfleet.audit")  # -> Cloud Logging in prod
 
+# In-memory audit trail — the "receipts". In prod these also flow to Cloud Logging;
+# kept here so the brief can cite an audit_ref and tests can assert governance fired.
+_AUDIT: list[dict] = []
 
-def _log(event: str, **kw):
-    audit.info(json.dumps({"event": event, "ts": datetime.now(timezone.utc).isoformat(), **kw}))
+
+def _log(event: str, **kw) -> str:
+    ref = f"audit:{event}:{len(_AUDIT)}"
+    record = {"ref": ref, "event": event,
+              "ts": datetime.now(timezone.utc).isoformat(), **kw}
+    _AUDIT.append(record)
+    audit.info(json.dumps(record))
+    return ref
+
+
+def audit_trail() -> list[dict]:
+    """A copy of the governance receipts logged so far."""
+    return list(_AUDIT)
+
+
+def clear_audit() -> None:
+    """Reset the in-memory trail (between runs / in tests)."""
+    _AUDIT.clear()
 
 
 class GateDenied(Exception):
@@ -57,3 +76,12 @@ CALL_SCRIPT_PREAMBLE = (
     "Hi, I'm an AI assistant calling on behalf of a customer. "
     "Just a quick stock question if you have a moment — "
 )
+
+
+def gate_call_script(question: str) -> None:
+    """AI self-identification is non-negotiable: every call must open by disclosing
+    that it's an AI calling on a customer's behalf."""
+    if not question.startswith(CALL_SCRIPT_PREAMBLE):
+        _log("call_script_denied")
+        raise GateDenied("Call script must begin with AI self-identification.")
+    _log("call_script_ok")

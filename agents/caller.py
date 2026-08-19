@@ -10,7 +10,8 @@ itself as AI, gets an answer, hangs up politely.
 """
 from google.adk.agents import Agent
 from agents import model_factory
-from guardrails.gates import gate_phone_call, CALL_SCRIPT_PREAMBLE, GateDenied
+from guardrails.gates import (gate_phone_call, gate_call_script,
+                              CALL_SCRIPT_PREAMBLE, GateDenied)
 
 
 def request_human_approval(store_name: str, reason: str) -> dict:
@@ -23,9 +24,8 @@ def place_verification_call(phone: str, question: str) -> dict:
     """Tool: trigger outbound call via Conversational Agents Phone Gateway,
     return transcript + extracted answer. Question MUST start with
     CALL_SCRIPT_PREAMBLE (AI self-identification is non-negotiable)."""
-    if not question.startswith(CALL_SCRIPT_PREAMBLE):
-        raise ValueError("Call script must begin with AI self-identification.")
-    raise NotImplementedError
+    gate_call_script(question)  # governed: enforces AI self-identification
+    raise NotImplementedError  # TODO: Dialogflow CX Phone Gateway (deferred)
 
 
 caller = Agent(
