@@ -53,6 +53,9 @@ STEP 3 — emit ONLY a JSON array (no prose, no markdown fences) of Offer object
   merchant     = the merchant
   program      = program_hint if set; else infer from categories/title; else "none"
   offer_type   = one of bonus_points | multiplier | discount_stack | collectible (closest fit)
+  category     = one of credit_card | insurance | energy | telco | groceries |
+                 subscription | collectible | shopping | other (infer from tags/merchant/title;
+                 a card is credit_card even if it earns points; health/car/home cover is insurance)
   item         = short item name, or null
   price_aud    = the price, or null
   points_out   = points earned ONLY if the deal states it, else null

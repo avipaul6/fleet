@@ -5,7 +5,8 @@ receipts for the 'governed agency' story — and they run in CI.
 """
 import pytest
 from guardrails.gates import (gate_spend, gate_phone_call, gate_tos, gate_call_script,
-                              GateDenied, audit_trail, clear_audit, CALL_SCRIPT_PREAMBLE)
+                              gate_preference, GateDenied, audit_trail, clear_audit,
+                              CALL_SCRIPT_PREAMBLE)
 from agents.valuer import compute_stack_value
 from agents.worth_it import worth_it_verdict
 
@@ -97,6 +98,25 @@ def test_audit_trail_records_denials():
     trail = audit_trail()
     assert any(r["event"] == "spend_denied" for r in trail)
     assert all("ref" in r and "ts" in r for r in trail)
+
+
+# --- user preferences: skip what they don't want, respect conditional bars ---
+
+def test_preference_avoids_unwanted_category():
+    reason = gate_preference("credit_card", 1620.0)  # high value, but avoided
+    assert reason is not None and "credit card" in reason
+
+
+def test_preference_conditional_below_bar_is_skipped():
+    assert gate_preference("insurance", 200.0) is not None   # below the $300 bar
+
+
+def test_preference_conditional_above_bar_surfaces():
+    assert gate_preference("insurance", 450.0) is None       # clears the $300 bar
+
+
+def test_preference_allows_wanted_category():
+    assert gate_preference("energy", 50.0) is None           # not avoided, not gated
 
 
 # TODO (stretch): LLM-level evals with `adk eval` — feed the valuer a synthetic

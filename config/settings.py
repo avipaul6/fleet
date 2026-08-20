@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     # "vertex_ai/..." or "litellm/..." prefix -> LiteLlm wrapper (e.g. Claude on
     # Vertex AI Model Garden). Still 100% inside GCP.
     model_fast: str = "gemini-3.5-flash"      # scouts, worth-it, presenter
-    model_strong: str = "gemini-2.5-pro"      # coordinator, valuer, caller
+    # Hackathon REQUIRES Gemini 3+. 3.x Pro wasn't available to the project (404), so both
+    # tiers default to the GA 3.5-flash; swap STRONG to a 3.x Pro via env once granted.
+    model_strong: str = "gemini-3.5-flash"    # coordinator, valuer, caller
 
     # --- Household profile (hackathon: hardcode, don't build OAuth) ---
     home_lat: float = -27.5236   # Tarragindi-ish; set yours
@@ -24,6 +26,10 @@ class Settings(BaseSettings):
     cards: list[str] = ["qantas_amex"]
     time_value_aud_per_hour: float = 60.0
     fuel_aud_per_km: float = 0.16
+    # Category preferences: avoid = always skip (shown in brief, with reason);
+    # conditional = surface only if net value clears the $ bar; else "want" (default).
+    prefs_avoid: list[str] = ["credit_card"]
+    prefs_conditional: dict[str, float] = {"insurance": 300.0}
     # Where the morning brief is emailed (hackathon: one recipient in config;
     # later: per-user from the profile UI). Set DUCKFLEET_NOTIFY_EMAIL in .env.
     notify_email: str = ""

@@ -26,6 +26,8 @@ net_value_aud descending (skips last). Each ActionItem:
                     Escalate a do_it to needs_approval if the action is GATED — the spend
                     exceeds the weekly cap, or a phone call / human sign-off is required.
   reasoning       : ONE honest sentence the human reads; for skips, name the trade-off.
+                    If the offer has a non-null preference_note, the verdict IS skip and your
+                    reasoning MUST be that preference_note verbatim (it's the user's own choice).
   audit_ref       : echo the offer's provided audit_ref verbatim
 
 ALWAYS include refused errands — restraint is a feature, not a gap. Never invent offers.

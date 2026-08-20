@@ -9,6 +9,7 @@
       "merchant": "BigW Mt Gravatt",
       "program": "qantas_ff",
       "offer_type": "collectible",
+      "category": "collectible",
       "item": "rubber duck",
       "price_aud": 3.50,
       "points_out": 30,
@@ -27,6 +28,7 @@
       "merchant": "Collectible @ Springfield",
       "program": "none",
       "offer_type": "collectible",
+      "category": "collectible",
       "item": "Ooshie 4-pack",
       "price_aud": 6.00,
       "points_out": 0,
@@ -46,6 +48,7 @@
       "merchant": "Gift Card Portal",
       "program": "none",
       "offer_type": "discount_stack",
+      "category": "other",
       "item": "gift-card coupon-stacking loophole",
       "price_aud": 0.0,
       "points_out": 0,
@@ -54,6 +57,38 @@
       "requires_instore": false,
       "tos_risk": "violation",
       "est_value_aud": 40.0
+    },
+    {
+      "id": "westpac-altitude-2026",
+      "source": "manual",
+      "source_url": "https://example.com/demo-fixture",
+      "merchant": "Westpac Altitude Black",
+      "program": "qantas_ff",
+      "offer_type": "bonus_points",
+      "category": "credit_card",
+      "item": "90k Qantas points sign-up",
+      "price_aud": 0.0,
+      "points_out": 90000,
+      "spend_required_aud": 3000.0,
+      "multipliers": [],
+      "requires_instore": false,
+      "tos_risk": "none"
+    },
+    {
+      "id": "bupa-cover-2026",
+      "source": "manual",
+      "source_url": "https://example.com/demo-fixture",
+      "merchant": "Bupa Health Cover",
+      "program": "everyday_rewards",
+      "offer_type": "bonus_points",
+      "category": "insurance",
+      "item": "40k Everyday Rewards points",
+      "price_aud": 0.0,
+      "points_out": 40000,
+      "spend_required_aud": 0.0,
+      "multipliers": [],
+      "requires_instore": false,
+      "tos_risk": "none"
     }
   ]
 }

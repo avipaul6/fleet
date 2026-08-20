@@ -12,6 +12,9 @@ class Offer(BaseModel):
     # "none" = a strong stackable deal that earns no specific scheme on its own
     program: Literal["qantas_ff", "velocity", "flybuys", "everyday_rewards", "none"]
     offer_type: Literal["bonus_points", "multiplier", "discount_stack", "collectible"]
+    # semantic category for user preferences (avoid / want / conditional)
+    category: Literal["credit_card", "insurance", "energy", "telco", "groceries",
+                      "subscription", "collectible", "shopping", "other"] = "other"
     item: str | None = None            # "rubber duck", "ooshie"
     price_aud: float | None = None
     points_out: int | None = None

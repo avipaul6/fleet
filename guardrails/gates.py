@@ -77,6 +77,22 @@ def gate_tos(tos_risk: str, offer_id: str) -> None:
         # Grey-area stacks are shown but flagged, never auto-actioned.
 
 
+def gate_preference(category: str, net_value_aud: float, offer_id: str = "?") -> str | None:
+    """User-preference gate. Returns a SKIP reason if the user doesn't want this
+    category (avoid), or a conditional category didn't clear its $ bar; else None.
+    Preference skips stay VISIBLE in the brief — the human sees what was passed on and why."""
+    cat = (category or "other").lower()
+    if cat in [c.lower() for c in settings.prefs_avoid]:
+        _log("pref_avoided", offer=offer_id, category=cat)
+        return f"you asked to skip {cat.replace('_', ' ')} offers"
+    bar = {k.lower(): v for k, v in settings.prefs_conditional.items()}.get(cat)
+    if bar is not None and (net_value_aud or 0) < bar:
+        _log("pref_below_bar", offer=offer_id, category=cat, bar=bar)
+        return (f"{cat.replace('_', ' ')} only if it clears ${bar:,.0f} net "
+                f"(this was ${net_value_aud:,.0f})")
+    return None
+
+
 CALL_SCRIPT_PREAMBLE = (
     "Hi, I'm an AI assistant calling on behalf of a customer. "
     "Just a quick stock question if you have a moment — "

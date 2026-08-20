@@ -20,7 +20,8 @@ from agents.scouts import scout_ozbargain
 from agents.presenter import presenter
 from agents.valuer import compute_stack_value
 from agents.worth_it import worth_it_verdict, errand_cost
-from guardrails.gates import gate_tos, gate_spend, record, clear_audit, audit_trail, GateDenied
+from guardrails.gates import (gate_tos, gate_spend, gate_preference, record,
+                              clear_audit, audit_trail, GateDenied)
 from schemas.offer import ActionItem
 from config.settings import settings
 from agents import history
@@ -119,29 +120,36 @@ async def run_fleet(replay: bool = True) -> dict:
             continue
 
         val = _value(o, cap)
+        category = o.get("category", "other")
 
-        # --- gate 2: spend cap (sizing keeps spend <= cap; over-cap -> approval) ---
+        # --- gate 2: user preferences (a visible skip, not a hidden exclusion) ---
+        pref_note = gate_preference(category, val["value_aud"], oid)
+
+        # --- gate 3: spend cap (sizing keeps spend <= cap; over-cap -> approval) ---
         needs_approval = False
         try:
             gate_spend(val["spend_aud"], 0.0)
         except GateDenied:
             needs_approval = True
 
-        # --- worth-it: real drive economics (or frozen drive in replay) ---
-        drive = _drive(o)
-        if drive:
-            wv = worth_it_verdict(val["value_aud"], drive["minutes"], drive["km"])
-            verdict, net, trip_cost = wv["verdict"], wv["net_after_trip_aud"], wv["trip_cost_aud"]
-            tmin, tkm = drive["minutes"], drive["km"]
-        else:  # online / no known store -> no errand cost
-            verdict = "do_it" if val["value_aud"] > 0 else "skip"
-            net, trip_cost, tmin, tkm = val["value_aud"], 0.0, 0.0, 0.0
-        if needs_approval and verdict == "do_it":
-            verdict = "needs_approval"
+        if pref_note:  # preference says skip — don't even cost the drive
+            verdict, net, trip_cost, tmin, tkm = "skip", val["value_aud"], 0.0, 0.0, 0.0
+        else:
+            drive = _drive(o)
+            if drive:
+                wv = worth_it_verdict(val["value_aud"], drive["minutes"], drive["km"])
+                verdict, net, trip_cost = wv["verdict"], wv["net_after_trip_aud"], wv["trip_cost_aud"]
+                tmin, tkm = drive["minutes"], drive["km"]
+            else:  # online / no known store -> no errand cost
+                verdict = "do_it" if val["value_aud"] > 0 else "skip"
+                net, trip_cost, tmin, tkm = val["value_aud"], 0.0, 0.0, 0.0
+            if needs_approval and verdict == "do_it":
+                verdict = "needs_approval"
 
         ref = record("offer_assessed", offer=oid, verdict=verdict, net_value_aud=net)
         assessed.append({
             "id": oid, "merchant": o.get("merchant"), "item": o.get("item"),
+            "category": category, "preference_note": pref_note,
             "program": o.get("program", "none"), "cents_per_point": val["cents_per_point"],
             "units": val["units"], "spend_aud": val["spend_aud"],
             "total_points": val["total_points"], "offer_value_aud": val["value_aud"],
