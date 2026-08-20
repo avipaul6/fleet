@@ -1,4 +1,7 @@
 """Central config. Everything overridable via env — including models per tier."""
+import json
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -62,3 +65,14 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Apply the onboarding profile (profile.json) on top of env/defaults, if present.
+# This is exactly what the onboarding agent writes — the fleet reads it here.
+_profile_path = Path(__file__).resolve().parent.parent / "profile.json"
+if _profile_path.exists():
+    try:
+        for _k, _v in json.loads(_profile_path.read_text()).items():
+            if hasattr(settings, _k) and _v not in (None, [], {}):
+                setattr(settings, _k, _v)
+    except Exception:
+        pass

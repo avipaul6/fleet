@@ -9,6 +9,8 @@ venv/
 .env
 *.key
 service-account*.json
+# User-specific profile written by the onboarding agent
+profile.json
 # GCP / build
 .gcloudignore
 dist/
