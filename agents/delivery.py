@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 from datetime import date
 from email.message import EmailMessage
+from html import escape as _esc
 
 import httpx
 from google.oauth2.credentials import Credentials
@@ -84,6 +85,18 @@ def render_text(result: dict) -> str:
             L.append(f"  • {c['merchant']} — {c['item']} (gated call: it self-identifies as AI)")
         L.append("")
 
+    econ = result.get("economics")
+    if econ:
+        c, v, roi = econ.get("cost_aud", 0), econ.get("value_aud", 0), econ.get("roi")
+        if econ.get("verdict") == "quiet_night":
+            L += [f"\U0001F9EE Run economics: ~${c:.3f} compute · nothing cleared the bar — "
+                  f"a quiet, cheap night (the fleet won't burn credit for nothing).", ""]
+        else:
+            roi_s = f"  (≈{roi:,.0f}× return)" if roi else ""
+            worth = "worth running" if econ.get("verdict") == "worth_it" else "NOT worth the compute"
+            L += [f"\U0001F9EE Run economics: ~${c:.3f} compute → ${v:,.2f} of value surfaced"
+                  f"{roi_s} — {worth}.", ""]
+
     hist = result.get("history_rows", 0)
     L += [_SUB, "What's real vs simulated (build period):",
           f"  • Deals: {'replay fixtures (canned)' if mode == 'replay' else 'live OzBargain feed (real)'}",
@@ -93,6 +106,82 @@ def render_text(result: dict) -> str:
           f"  • History → BigQuery: {f'yes ({hist} rows)' if hist else 'off'}",
           "", "Reply STOP to pause the fleet."]
     return "\n".join(L)
+
+
+def _badge(verdict: str) -> str:
+    c = {"do_it": ("#e6f4ea", "#1a7f37", "DO IT"),
+         "needs_approval": ("#fef7e6", "#b54708", "NEEDS YOUR OK"),
+         "skip": ("#fdecec", "#b42318", "SKIP")}.get(verdict, ("#eee", "#333", verdict.upper()))
+    return (f'<span style="background:{c[0]};color:{c[1]};padding:2px 8px;border-radius:10px;'
+            f'font-size:11px;font-weight:700">{c[2]}</span>')
+
+
+def render_html(result: dict) -> str:
+    """Light, email-safe HTML (inline styles, tables, no images). Sent as the HTML
+    alternative alongside the plain-text version — clients that block HTML fall back."""
+    mode = result.get("mode", "live")
+    items = sorted(result.get("brief", []), key=lambda a: a.rank)
+    excluded = result.get("excluded_tos", 0)
+    top = next((a for a in items if a.verdict in ("do_it", "needs_approval")), None)
+    others = [a for a in items if a.verdict in ("do_it", "needs_approval") and a is not top]
+    skips = [a for a in items if a.verdict == "skip"]
+    calls = result.get("call_candidates", [])
+    econ = result.get("economics")
+    banner = "SIMULATION · replay fixtures" if mode == "replay" else "LIVE · OzBargain feed"
+
+    P = ['<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;'
+         'max-width:640px;margin:0 auto;color:#1a1a1a;line-height:1.45">']
+    P.append('<div style="font-size:22px;font-weight:800">🦆 DuckFleet — Daily Hunt</div>')
+    P.append(f'<div style="color:#667085;font-size:13px;margin:2px 0 16px">'
+             f'{date.today():%-d %b %Y} · {banner}</div>')
+
+    if top:
+        cpp = f' · {top.cents_per_point}c/pt' if top.cents_per_point is not None else ''
+        P.append(
+            '<div style="border:1px solid #e4e7ec;border-radius:12px;padding:16px;'
+            'margin-bottom:16px;background:#fbfdff">'
+            '<div style="font-size:11px;letter-spacing:.5px;color:#667085;font-weight:700">⭐ TOP PICK</div>'
+            f'<div style="font-size:34px;font-weight:800;margin:4px 0">${top.net_value_aud:,.2f}'
+            f'<span style="font-size:14px;font-weight:600;color:#667085"> net{cpp}</span></div>'
+            f'<div style="font-weight:600;margin-bottom:6px">{_esc(top.headline)} &nbsp;{_badge(top.verdict)}</div>'
+            f'<div style="color:#475467;font-size:14px">{_esc(top.reasoning)}</div></div>')
+
+    if others:
+        rows = "".join(
+            f'<tr><td style="padding:7px 0;border-top:1px solid #f0f0f0">{_esc(a.headline)}</td>'
+            f'<td style="padding:7px 0;border-top:1px solid #f0f0f0;text-align:right;white-space:nowrap">'
+            f'${a.net_value_aud:,.0f} &nbsp;{_badge(a.verdict)}</td></tr>' for a in others)
+        P.append('<div style="font-weight:700;margin:6px 0">✅ Also worth doing</div>'
+                 f'<table style="width:100%;border-collapse:collapse;font-size:14px">{rows}</table>')
+
+    if skips:
+        lis = "".join(f'<li style="margin:5px 0"><span style="color:#344054">{_esc(a.headline)}</span>'
+                      f' — <span style="color:#667085">{_esc(a.reasoning)}</span></li>' for a in skips)
+        P.append('<div style="font-weight:700;margin:16px 0 4px">⛔ Skipped</div>'
+                 f'<ul style="margin:0;padding-left:18px;font-size:14px">{lis}</ul>')
+
+    if excluded:
+        P.append(f'<div style="margin:12px 0;color:#b42318;font-size:14px">🚫 {excluded} offer(s) '
+                 'excluded for ToS risk before review</div>')
+
+    if calls:
+        lis = "".join(f'<li style="margin:3px 0">{_esc(c["merchant"])} — {_esc(c["item"])}</li>' for c in calls)
+        P.append('<div style="border:1px dashed #c9d2e3;border-radius:10px;padding:10px 14px;'
+                 'margin:16px 0;background:#fafbff;font-size:14px"><b>📞 Stock check</b> — reply '
+                 '<b>APPROVE</b> and the fleet will call to verify (it self-identifies as AI):'
+                 f'<ul style="margin:6px 0 0;padding-left:18px">{lis}</ul></div>')
+
+    if econ:
+        c, v, roi = econ.get("cost_aud", 0), econ.get("value_aud", 0), econ.get("roi")
+        if econ.get("verdict") == "quiet_night":
+            etxt = f'🧮 ~${c:.3f} compute · nothing cleared the bar — a quiet, cheap night.'
+        else:
+            etxt = f'🧮 ~${c:.3f} compute → ${v:,.2f} value' + (f' (≈{roi:,.0f}× return)' if roi else '')
+        P.append(f'<div style="margin:16px 0;font-size:13px;color:#475467">{etxt}</div>')
+
+    P.append('<div style="border-top:1px solid #eee;margin-top:16px;padding-top:10px;'
+             'color:#98a2b3;font-size:12px">Reply STOP to pause the fleet.</div></div>')
+    return "".join(P)
 
 
 def _access_token() -> str:
@@ -107,16 +196,19 @@ def _access_token() -> str:
     return creds.token
 
 
-def send_brief(subject: str, body_text: str) -> dict:
-    """Send the brief to settings.notify_email as the configured sender. Raises if
-    Gmail isn't configured — callers should gate on gmail_configured() first."""
+def send_brief(subject: str, body_text: str, body_html: str | None = None) -> dict:
+    """Send the brief to settings.notify_email as the configured sender. Sends
+    multipart/alternative (plain text + optional HTML) so clients that block HTML fall
+    back to plain text. Raises if Gmail isn't configured — gate on gmail_configured()."""
     if not gmail_configured():
         raise RuntimeError("Gmail not configured (set DUCKFLEET_GMAIL_* + DUCKFLEET_NOTIFY_EMAIL).")
     msg = EmailMessage()
     msg["To"] = settings.notify_email
     msg["From"] = settings.gmail_sender or "me"
     msg["Subject"] = subject
-    msg.set_content(body_text)
+    msg.set_content(body_text)                      # plain-text fallback (always present)
+    if body_html:
+        msg.add_alternative(body_html, subtype="html")
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
     resp = httpx.post(_SEND_URL, headers={"Authorization": f"Bearer {_access_token()}"},
                       json={"raw": raw}, timeout=20.0)

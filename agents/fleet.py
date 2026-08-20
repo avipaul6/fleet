@@ -25,6 +25,7 @@ from guardrails.gates import (gate_tos, gate_spend, gate_preference, record,
 from schemas.offer import ActionItem
 from config.settings import settings
 from agents import history
+from agents.economics import RunCost, worth_running
 
 _FIX = Path(__file__).resolve().parent.parent / "fixtures"
 
@@ -52,22 +53,26 @@ def _json_array(text: str):
     return json.loads(text[i:j + 1]) if i != -1 and j != -1 else json.loads(text)
 
 
-async def _run_agent(agent, app: str, text: str) -> str:
+async def _run_agent(agent, app: str, text: str, cost=None) -> str:
     runner = InMemoryRunner(agent=agent, app_name=app)
     s = await runner.session_service.create_session(app_name=app, user_id="fleet")
     msg = types.Content(role="user", parts=[types.Part(text=text)])
     final = ""
     async for ev in runner.run_async(user_id="fleet", session_id=s.id, new_message=msg):
+        um = getattr(ev, "usage_metadata", None)
+        if cost is not None and um is not None:
+            cost.add_llm(getattr(um, "prompt_token_count", 0) or 0,
+                         getattr(um, "candidates_token_count", 0) or 0)
         if ev.is_final_response() and ev.content and ev.content.parts:
             final = "".join(p.text or "" for p in ev.content.parts)
     return final
 
 
-async def _get_offers(replay: bool) -> list[dict]:
+async def _get_offers(replay: bool, cost=None) -> list[dict]:
     if replay:
         return json.loads((_FIX / "replay_offers.json").read_text())["offers"]
     scouted = _json_array(await _run_agent(
-        scout_ozbargain, "fleet-scout", "Scout OzBargain for loyalty-points offers now."))
+        scout_ozbargain, "fleet-scout", "Scout OzBargain for loyalty-points offers now.", cost))
     for o in scouted:
         coords = _store_for(o.get("merchant", ""))
         if coords:
@@ -89,12 +94,14 @@ def _value(o: dict, cap: float) -> dict:
             "units": 1, "total_points": 0, "spend_aud": price}
 
 
-def _drive(o: dict):
+def _drive(o: dict, cost=None):
     if "drive" in o:
         return o["drive"]
     if "store_lat" in o and "store_lng" in o:
         try:
             t = errand_cost(o["store_lat"], o["store_lng"])
+            if cost is not None:
+                cost.add_routes()
             return {"minutes": t["minutes"], "km": t["km"]}
         except Exception:
             return None
@@ -105,8 +112,9 @@ async def run_fleet(replay: bool = True) -> dict:
     """Run the whole fleet once. Returns {brief: [ActionItem], assessed, audit,
     excluded_tos, n_candidates}."""
     clear_audit()
+    cost = RunCost()
     cap = settings.spend_cap_aud_per_week
-    offers = await _get_offers(replay)
+    offers = await _get_offers(replay, cost)
 
     assessed: list[dict] = []
     excluded_tos = 0
@@ -135,7 +143,7 @@ async def run_fleet(replay: bool = True) -> dict:
         if pref_note:  # preference says skip — don't even cost the drive
             verdict, net, trip_cost, tmin, tkm = "skip", val["value_aud"], 0.0, 0.0, 0.0
         else:
-            drive = _drive(o)
+            drive = _drive(o, cost)
             if drive:
                 wv = worth_it_verdict(val["value_aud"], drive["minutes"], drive["km"])
                 verdict, net, trip_cost = wv["verdict"], wv["net_after_trip_aud"], wv["trip_cost_aud"]
@@ -174,10 +182,18 @@ async def run_fleet(replay: bool = True) -> dict:
     history_rows = history.record_run(assessed, "replay" if replay else "live")
 
     brief_raw = await _run_agent(presenter, "fleet-present",
-                                 "Compose the morning brief:\n" + json.dumps(assessed))
+                                 "Compose the morning brief:\n" + json.dumps(assessed), cost)
     items = [ActionItem(**x) for x in _json_array(brief_raw)]
     items.sort(key=lambda a: a.rank)
+
+    # Self-governance: did this run earn its compute? (value surfaced vs cost spent)
+    value = sum((a["net_value_aud"] or 0) for a in assessed
+                if a["verdict"] in ("do_it", "needs_approval"))
+    econ = worth_running(value, cost.total_aud)
+    record("run_economics", **econ, **cost.breakdown())
+
     return {"brief": items, "assessed": assessed, "audit": audit_trail(),
             "excluded_tos": excluded_tos, "n_candidates": len(offers),
             "history_rows": history_rows, "mode": "replay" if replay else "live",
-            "call_candidates": call_candidates}
+            "call_candidates": call_candidates,
+            "economics": {**econ, "breakdown": cost.breakdown()}}

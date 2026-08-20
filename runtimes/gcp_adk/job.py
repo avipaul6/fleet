@@ -26,7 +26,7 @@ if _envf.exists():
             os.environ.setdefault(_k.strip(), _v.strip())
 
 from agents.fleet import run_fleet                                      # noqa: E402
-from agents.delivery import gmail_configured, send_brief, render_text    # noqa: E402
+from agents.delivery import gmail_configured, send_brief, render_text, render_html  # noqa: E402
 from config.settings import settings                                    # noqa: E402
 
 
@@ -47,7 +47,7 @@ async def _main() -> None:
     # Deliver via Gmail if configured; otherwise say exactly what's missing (never silent).
     if gmail_configured():
         subject = f"🦆 DuckFleet — Daily Hunt, {date.today():%-d %b %Y}"
-        send_brief(subject, render_text(result))
+        send_brief(subject, render_text(result), render_html(result))
         print(json.dumps({"event": "brief_emailed", "to": settings.notify_email}))
     else:
         missing = [name for name, val in [
