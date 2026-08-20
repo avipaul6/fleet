@@ -157,8 +157,18 @@ async def run_fleet(replay: bool = True) -> dict:
             "net_value_aud": net, "verdict": verdict,
             "requires_instore": o.get("requires_instore", False),
             "tos_risk": o.get("tos_risk", "none"), "weekly_cap_aud": cap,
+            "stock_state": o.get("stock_state"), "store_phone": o.get("store_phone"),
             "audit_ref": ref,
         })
+
+    # Offers worth doing whose stock is unconfirmed + reachable -> a gated call the human
+    # can approve. This is the caller beat surfaced in the brief.
+    call_candidates = [
+        {"merchant": a["merchant"], "item": a["item"], "phone": a["store_phone"]}
+        for a in assessed
+        if a["verdict"] in ("do_it", "needs_approval")
+        and a.get("stock_state") in ("unknown", "low") and a.get("store_phone")
+    ]
 
     # append this run's offers to BigQuery history (best-effort; never blocks the brief)
     history_rows = history.record_run(assessed, "replay" if replay else "live")
@@ -169,4 +179,5 @@ async def run_fleet(replay: bool = True) -> dict:
     items.sort(key=lambda a: a.rank)
     return {"brief": items, "assessed": assessed, "audit": audit_trail(),
             "excluded_tos": excluded_tos, "n_candidates": len(offers),
-            "history_rows": history_rows, "mode": "replay" if replay else "live"}
+            "history_rows": history_rows, "mode": "replay" if replay else "live",
+            "call_candidates": call_candidates}

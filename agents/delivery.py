@@ -77,12 +77,19 @@ def render_text(result: dict) -> str:
     if excluded:
         L += [f"\U0001F6AB EXCLUDED — {excluded} offer(s) blocked for ToS risk before review", ""]
 
+    calls = result.get("call_candidates", [])
+    if calls:
+        L.append("\U0001F4DE STOCK CHECK — reply APPROVE and the fleet will call to verify before you go:")
+        for c in calls:
+            L.append(f"  • {c['merchant']} — {c['item']} (gated call: it self-identifies as AI)")
+        L.append("")
+
     hist = result.get("history_rows", 0)
     L += [_SUB, "What's real vs simulated (build period):",
           f"  • Deals: {'replay fixtures (canned)' if mode == 'replay' else 'live OzBargain feed (real)'}",
           "  • Points maths & spend cap: real (deterministic Python)",
           f"  • Drive time/fuel: {'frozen fixture values' if mode == 'replay' else 'estimated from a local store directory'}",
-          "  • Phone stock-check: not enabled yet (would be gated + labelled)",
+          "  • Phone stock-check: gated; a real call on your approval (Twilio), else labelled-simulated",
           f"  • History → BigQuery: {f'yes ({hist} rows)' if hist else 'off'}",
           "", "Reply STOP to pause the fleet."]
     return "\n".join(L)

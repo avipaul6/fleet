@@ -11,6 +11,7 @@ agent composes the question and consumes the transcript.
 from __future__ import annotations
 
 import datetime
+import re
 from pathlib import Path
 
 from xml.sax.saxutils import escape as _xml_escape
@@ -51,10 +52,15 @@ def _place_real_call(text: str) -> dict:
     then says goodbye. Answer-capture (speech->text) needs a webhook — a later step."""
     from twilio.rest import Client
     client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
-    twiml = (f"<Response><Say voice=\"Polly.Nicole\">{_xml_escape(text)}</Say>"
-             f"<Pause length=\"1\"/><Say>Thank you, goodbye.</Say></Response>")
-    call = client.calls.create(to=settings.verify_phone_number,
-                               from_=settings.twilio_from_number, twiml=twiml)
+    kwargs = {"to": settings.verify_phone_number, "from_": settings.twilio_from_number}
+    if settings.twilio_twiml_url:
+        # Trial-friendly: Twilio fetches the TwiML from this URL (a TwiML Bin or the demo doc).
+        kwargs["url"] = settings.twilio_twiml_url
+    else:
+        # Inline TwiML (paid accounts). Default (free) voice — premium voices are trial-blocked.
+        kwargs["twiml"] = (f"<Response><Say>{_xml_escape(text)}</Say>"
+                           f"<Pause length=\"1\"/><Say>Thank you, goodbye.</Say></Response>")
+    call = client.calls.create(**kwargs)
     return {"call_sid": call.sid, "to": settings.verify_phone_number}
 
 
@@ -90,9 +96,10 @@ def run_verification_call(store_name: str, item: str, human_approved: bool, *,
                     "answer": "(live call placed — spoken-answer capture via webhook is the next step)",
                     "audit_ref": ref}
         except Exception as e:
-            ref = record("call_failed", store=store_name, error=str(e)[:120])
+            msg = " ".join(re.sub(r"\x1b\[[0-9;]*m", "", str(e)).split())  # strip ANSI + tidy
+            ref = record("call_failed", store=store_name, error=msg[:160])
             return {"status": "failed", "simulated": False, "store": store_name,
-                    "reason": str(e), "audit_ref": ref}
+                    "reason": msg, "audit_ref": ref}
 
     # Otherwise: labelled simulation (real TTS audio, canned answer).
     ref = record("call_placed", store=store_name, item=item, simulated=True)

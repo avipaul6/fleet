@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_from_number: str = ""
+    # Trial accounts can't pass inline TwiML — point this at a TwiML Bin URL (or the
+    # Twilio demo doc) and we call with `url=` instead. Blank = inline TwiML (paid accounts).
+    twilio_twiml_url: str = ""
 
     # --- Guardrails (hard limits, not suggestions) ---
     spend_cap_aud_per_week: float = 100.0

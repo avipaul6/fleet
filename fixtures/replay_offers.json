@@ -17,6 +17,8 @@
       "multipliers": [10.0, 2.0],
       "requires_instore": true,
       "tos_risk": "none",
+      "stock_state": "unknown",
+      "store_phone": "+61731234567",
       "store_lat": -27.5514,
       "store_lng": 153.0888,
       "drive": {"minutes": 27.4, "km": 15.8}
