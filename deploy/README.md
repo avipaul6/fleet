@@ -1,4 +1,11 @@
-# Deploy (all GCP, ~$0 idle)
+# Deploy (Google Cloud; scales to zero when idle)
+
+> **Current deploy path:** the working scripts live in
+> [`../runtimes/gcp_adk/`](../runtimes/gcp_adk/) (Cloud Run **Job** + Cloud Scheduler).
+> This file is the original design sketch, kept for reference.
+
+You run it on your own project, so you pay for your own usage — idle cost is ~zero
+(scale-to-zero), and a nightly run is cents.
 
 ## Services
 - **Cloud Run service** `duckfleet-orchestrator` — ADK app (FastAPI via `adk api_server`), scale-to-zero.

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="720" viewBox="0 0 1120 720" font-family="Google Sans, Roboto, Arial, sans-serif">
+  <defs>
+    <marker id="arw" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#5f6368"/>
+    </marker>
+    <style>
+      .name{font-size:13px;font-weight:700;fill:#202124}
+      .role{font-size:11px;fill:#5f6368}
+      .hdr{font-size:12px;font-weight:700;fill:#5f6368;letter-spacing:.4px}
+      .flow{stroke:#5f6368;stroke-width:1.5;fill:none;marker-end:url(#arw)}
+    </style>
+  </defs>
+
+  <rect width="1120" height="720" fill="#f8f9fa"/>
+  <text x="40" y="40" font-size="20" font-weight="700" fill="#202124">DuckFleet — Architecture</text>
+  <text x="40" y="60" font-size="13" fill="#5f6368">Governed agent fleet on Google Cloud · nightly, background, human-gated actions</text>
+
+  <!-- Build / deploy (top-right) -->
+  <text class="hdr" x="760" y="90">BUILD &amp; DEPLOY</text>
+  <g transform="translate(760,100)"><rect width="160" height="52" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="52" rx="3" fill="#FBBC04"/><text class="name" x="16" y="23">Cloud Build</text><text class="role" x="16" y="40">source → image</text></g>
+  <g transform="translate(940,100)"><rect width="160" height="52" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="52" rx="3" fill="#EA4335"/><text class="name" x="16" y="23">Artifact Registry</text><text class="role" x="16" y="40">container image</text></g>
+  <path class="flow" d="M920,126 L938,126"/>
+
+  <!-- 1. Trigger -->
+  <text class="hdr" x="40" y="90">① NIGHTLY TRIGGER</text>
+  <g transform="translate(40,100)"><rect width="230" height="52" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="52" rx="3" fill="#4285F4"/><text class="name" x="16" y="23">Cloud Scheduler</text><text class="role" x="16" y="40">02:00 · Australia/Brisbane</text></g>
+  <path class="flow" d="M155,152 L155,178"/>
+
+  <!-- 2. Cloud Run Job container -->
+  <rect x="40" y="180" width="1060" height="150" rx="12" fill="#f1f6fe" stroke="#4285F4" stroke-dasharray="4 4"/>
+  <text x="58" y="205" font-size="13" font-weight="700" fill="#1967d2">Cloud Run Job · duckfleet-nightly — the fleet (Google ADK)</text>
+
+  <!-- pipeline tiles -->
+  <g transform="translate(58,225)"><rect width="150" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#34A853"/><text class="name" x="15" y="26">Scouts</text><text class="role" x="15" y="44">OzBargain feed →</text><text class="role" x="15" y="58">normalised offers</text></g>
+  <g transform="translate(228,225)"><rect width="150" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#FBBC04"/><text class="name" x="15" y="26">Valuer</text><text class="role" x="15" y="44">stack maths,</text><text class="role" x="15" y="58">cents-per-point</text></g>
+  <g transform="translate(398,225)"><rect width="160" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#EA4335"/><text class="name" x="15" y="26">Guardrails</text><text class="role" x="15" y="44">ToS · spend cap ·</text><text class="role" x="15" y="58">preferences · audit</text></g>
+  <g transform="translate(578,225)"><rect width="150" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#34A853"/><text class="name" x="15" y="26">Worth-It</text><text class="role" x="15" y="44">drive time + fuel</text><text class="role" x="15" y="58">vs value · refuses</text></g>
+  <g transform="translate(748,225)"><rect width="150" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#4285F4"/><text class="name" x="15" y="26">Presenter</text><text class="role" x="15" y="44">ranked brief +</text><text class="role" x="15" y="58">run ROI</text></g>
+  <g transform="translate(918,225)"><rect width="164" height="66" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="66" rx="3" fill="#EA4335"/><text class="name" x="15" y="26">Caller · gated</text><text class="role" x="15" y="44">verify stock by</text><text class="role" x="15" y="58">phone (approval)</text></g>
+  <g fill="none" stroke="#9aa0a6" stroke-width="1.4" marker-end="url(#arw)">
+    <path d="M208,258 L226,258"/><path d="M378,258 L396,258"/><path d="M558,258 L576,258"/><path d="M728,258 L746,258"/><path d="M898,258 L916,258"/>
+  </g>
+
+  <!-- 3. GCP services used -->
+  <text class="hdr" x="40" y="375">② GOOGLE CLOUD SERVICES (used by the fleet)</text>
+  <g transform="translate(40,385)"><rect width="250" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#4285F4"/><text class="name" x="16" y="26">Vertex AI</text><text class="role" x="16" y="45">Gemini flash + pro (per tier)</text></g>
+  <g transform="translate(310,385)"><rect width="250" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#34A853"/><text class="name" x="16" y="26">Maps Routes API</text><text class="role" x="16" y="45">drive time &amp; distance</text></g>
+  <g transform="translate(580,385)"><rect width="230" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#FBBC04"/><text class="name" x="16" y="26">Text-to-Speech</text><text class="role" x="16" y="45">gated call audio</text></g>
+  <g transform="translate(830,385)"><rect width="250" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#EA4335"/><text class="name" x="16" y="26">Secret Manager</text><text class="role" x="16" y="45">Gmail + Twilio credentials</text></g>
+  <g fill="none" stroke="#9aa0a6" stroke-width="1.4" marker-end="url(#arw)">
+    <path d="M165,385 L165,332"/><path d="M435,385 L435,332"/><path d="M695,385 L695,332"/><path d="M955,385 L955,332"/>
+  </g>
+
+  <!-- 4. Data + delivery -->
+  <text class="hdr" x="40" y="490">③ STATE, AUDIT &amp; DELIVERY (outputs)</text>
+  <g transform="translate(40,502)"><rect width="196" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#4285F4"/><text class="name" x="16" y="26">BigQuery</text><text class="role" x="16" y="45">offer_history</text></g>
+  <g transform="translate(256,502)"><rect width="196" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#EA4335"/><text class="name" x="16" y="26">Cloud Logging</text><text class="role" x="16" y="45">governance audit trail</text></g>
+  <g transform="translate(472,502)"><rect width="196" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#34A853"/><text class="name" x="16" y="26">Gmail API</text><text class="role" x="16" y="45">morning brief (HTML+text)</text></g>
+  <g transform="translate(688,502)"><rect width="196" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#FBBC04"/><text class="name" x="16" y="26">Twilio</text><text class="role" x="16" y="45">gated call · non-GCP</text></g>
+  <g transform="translate(904,502)"><rect width="176" height="60" rx="8" fill="#fff" stroke="#dadce0"/><rect width="6" height="60" rx="3" fill="#4285F4"/><text class="name" x="16" y="26">Google Calendar</text><text class="role" x="16" y="45">reminder links</text></g>
+  <path class="flow" d="M560,330 L560,500"/>
+
+  <!-- onboarding + external footnote -->
+  <g transform="translate(40,600)"><rect width="1040" height="86" rx="10" fill="#fff" stroke="#dadce0"/></g>
+  <text x="58" y="624" font-size="12" font-weight="700" fill="#5f6368">ONBOARDING &amp; INPUTS</text>
+  <text x="58" y="646" font-size="12" fill="#3c4043">• Onboarding agent (Vertex AI · Gemini) — a chat that writes <tspan font-weight="700">profile.json</tspan> (programs, preferences); the fleet reads it.</text>
+  <text x="58" y="666" font-size="12" fill="#3c4043">• External feeds: OzBargain RSS (read-only, rate-limited). Telephony via Twilio. Everything else is Google Cloud.</text>
+</svg>

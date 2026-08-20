@@ -9,7 +9,8 @@ stacking maths, refuses errands that aren't worth the drive, respects your prefe
 can place a *gated* phone call to verify stock — then emails you a ranked morning brief.
 
 This walkthrough deploys it to **your** Google Cloud project in **replay mode**: a
-deterministic demo brief with **no secrets and ~$0 cost**.
+deterministic demo brief with **no secrets required**. It runs on your own project, so
+you pay for your own usage — the job scales to zero when idle and a run costs cents.
 
 Estimated time: **~5 minutes**. Click **Start**.
 

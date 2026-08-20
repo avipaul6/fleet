@@ -42,6 +42,7 @@ def render_text(result: dict) -> str:
     build/simulation period — it's clear what's real vs simulated."""
     mode = result.get("mode", "live")
     items = sorted(result.get("brief", []), key=lambda a: a.rank)
+    by_ref = _by_ref(result)
     excluded = result.get("excluded_tos", 0)
     n_do = sum(1 for a in items if a.verdict in ("do_it", "needs_approval"))
     n_skip = sum(1 for a in items if a.verdict == "skip")
@@ -58,14 +59,15 @@ def render_text(result: dict) -> str:
         cpp = f"  ·  {top.cents_per_point}c/pt" if top.cents_per_point is not None else ""
         L += [_DIV, "⭐ TOP PICK", top.headline,
               f"   Worth ${top.net_value_aud:,.2f}{cpp}   →  {_verdict_label(top.verdict)}",
-              f"   {top.reasoning}", _DIV, ""]
+              f"   {top.reasoning}", *_links_text(top, by_ref), _DIV, ""]
 
     others = [a for a in items if a.verdict in ("do_it", "needs_approval") and a is not top]
     if others:
         L.append("✅ ALSO WORTH DOING")
         for a in others:
             cpp = f"  ·  {a.cents_per_point}c/pt" if a.cents_per_point is not None else ""
-            L += [f"  • {a.headline} — ${a.net_value_aud:,.2f}{cpp}", f"    {a.reasoning}"]
+            L += [f"  • {a.headline} — ${a.net_value_aud:,.2f}{cpp}", f"    {a.reasoning}",
+                  *_links_text(a, by_ref)]
         L.append("")
 
     skips = [a for a in items if a.verdict == "skip"]
@@ -116,11 +118,48 @@ def _badge(verdict: str) -> str:
             f'font-size:11px;font-weight:700">{c[2]}</span>')
 
 
+def _calendar_url(title: str, details: str = "") -> str:
+    """A Google Calendar 'add event' link (all-day, tomorrow) so a good one isn't forgotten."""
+    from datetime import date, timedelta
+    from urllib.parse import quote
+    d0 = date.today() + timedelta(days=1)
+    d1 = d0 + timedelta(days=1)
+    return ("https://calendar.google.com/calendar/render?action=TEMPLATE"
+            f"&text={quote('DuckFleet: ' + title)}&details={quote(details)}"
+            f"&dates={d0:%Y%m%d}/{d1:%Y%m%d}")
+
+
+def _by_ref(result: dict) -> dict:
+    return {a.get("audit_ref"): a for a in result.get("assessed", [])}
+
+
+def _links_html(item, by_ref: dict) -> str:
+    url = (by_ref.get(item.audit_ref) or {}).get("source_url")
+    btn = ("display:inline-block;padding:6px 12px;border-radius:8px;text-decoration:none;"
+           "font-size:13px;font-weight:600;margin:8px 8px 0 0")
+    out = []
+    if url:
+        out.append(f'<a href="{_esc(url)}" style="{btn};background:#1a7f37;color:#fff">Activate / view ↗</a>')
+    out.append(f'<a href="{_esc(_calendar_url(item.headline))}" style="{btn};'
+               f'background:#eef2ff;color:#3538cd">📅 Add reminder</a>')
+    return "".join(out)
+
+
+def _links_text(item, by_ref: dict) -> list[str]:
+    url = (by_ref.get(item.audit_ref) or {}).get("source_url")
+    lines = []
+    if url:
+        lines.append(f"   ↗ Activate/view: {url}")
+    lines.append(f"   📅 Add reminder: {_calendar_url(item.headline)}")
+    return lines
+
+
 def render_html(result: dict) -> str:
     """Light, email-safe HTML (inline styles, tables, no images). Sent as the HTML
     alternative alongside the plain-text version — clients that block HTML fall back."""
     mode = result.get("mode", "live")
     items = sorted(result.get("brief", []), key=lambda a: a.rank)
+    by_ref = _by_ref(result)
     excluded = result.get("excluded_tos", 0)
     top = next((a for a in items if a.verdict in ("do_it", "needs_approval")), None)
     others = [a for a in items if a.verdict in ("do_it", "needs_approval") and a is not top]
@@ -144,15 +183,15 @@ def render_html(result: dict) -> str:
             f'<div style="font-size:34px;font-weight:800;margin:4px 0">${top.net_value_aud:,.2f}'
             f'<span style="font-size:14px;font-weight:600;color:#667085"> net{cpp}</span></div>'
             f'<div style="font-weight:600;margin-bottom:6px">{_esc(top.headline)} &nbsp;{_badge(top.verdict)}</div>'
-            f'<div style="color:#475467;font-size:14px">{_esc(top.reasoning)}</div></div>')
+            f'<div style="color:#475467;font-size:14px">{_esc(top.reasoning)}</div>'
+            f'<div>{_links_html(top, by_ref)}</div></div>')
 
     if others:
-        rows = "".join(
-            f'<tr><td style="padding:7px 0;border-top:1px solid #f0f0f0">{_esc(a.headline)}</td>'
-            f'<td style="padding:7px 0;border-top:1px solid #f0f0f0;text-align:right;white-space:nowrap">'
-            f'${a.net_value_aud:,.0f} &nbsp;{_badge(a.verdict)}</td></tr>' for a in others)
-        P.append('<div style="font-weight:700;margin:6px 0">✅ Also worth doing</div>'
-                 f'<table style="width:100%;border-collapse:collapse;font-size:14px">{rows}</table>')
+        P.append('<div style="font-weight:700;margin:14px 0 4px">✅ Also worth doing</div>')
+        for a in others:
+            P.append(f'<div style="border-top:1px solid #f0f0f0;padding:8px 0;font-size:14px">'
+                     f'{_esc(a.headline)} — ${a.net_value_aud:,.0f} &nbsp;{_badge(a.verdict)}'
+                     f'<div>{_links_html(a, by_ref)}</div></div>')
 
     if skips:
         lis = "".join(f'<li style="margin:5px 0"><span style="color:#344054">{_esc(a.headline)}</span>'

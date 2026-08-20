@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # DuckFleet one-click quickstart — run in Google Cloud Shell.
 # Deploys the nightly fleet as a Cloud Run Job in REPLAY mode (deterministic hero brief,
-# NO secrets required, ~$0) and runs it once so you can see the brief it produces.
+# NO secrets required) and runs it once so you can see the brief it produces.
+# Runs on your own project — you pay for your own usage (scale-to-zero idle; a run is cents).
 # Add Gmail/Twilio + a nightly schedule later (see runtimes/gcp_adk/README.md).
 set -euo pipefail
 

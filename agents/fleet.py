@@ -157,6 +157,7 @@ async def run_fleet(replay: bool = True) -> dict:
         ref = record("offer_assessed", offer=oid, verdict=verdict, net_value_aud=net)
         assessed.append({
             "id": oid, "merchant": o.get("merchant"), "item": o.get("item"),
+            "source_url": o.get("source_url"),
             "category": category, "preference_note": pref_note,
             "program": o.get("program", "none"), "cents_per_point": val["cents_per_point"],
             "units": val["units"], "spend_aud": val["spend_aud"],
