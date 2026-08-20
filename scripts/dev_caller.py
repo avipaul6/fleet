@@ -56,10 +56,14 @@ def main() -> None:
 
     print("③ You tap APPROVE, during hours — the gated call proceeds:")
     r = run_verification_call(STORE, ITEM, human_approved=True, local_hour=10, out_dir=OUT)
-    print(f"   → {r['status'].upper()}  (simulated={r['simulated']})")
-    print(f'     AI opens with: "{r["script"]}"')
-    print(f"     Real TTS audio: {r['audio_path']}")
-    print(f'     Store answer (simulated): {r["answer"]}\n')
+    if r["status"] == "failed":
+        print(f"   → CALL FAILED: {r.get('reason')}\n")
+    else:
+        kind = "SIMULATED" if r["simulated"] else f"LIVE CALL → {r.get('to')} (sid {r.get('call_sid')})"
+        print(f"   → {r['status'].upper()}  [{kind}]")
+        print(f'     AI opens with: "{r["script"]}"')
+        print(f"     Real TTS audio: {r['audio_path']}")
+        print(f'     Answer: {r["answer"]}\n')
 
     print("Governance receipts (audit trail):")
     for a in audit_trail():

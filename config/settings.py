@@ -41,6 +41,14 @@ class Settings(BaseSettings):
     gmail_client_secret: str = ""
     gmail_refresh_token: str = ""
 
+    # Phone verification (Twilio) — creds ONLY from env/Secret Manager, never committed.
+    # verify_phone_number = who to call (test: YOUR OWN number; prod: the store's).
+    # Blank/unset = fall back to the labelled call simulation.
+    verify_phone_number: str = ""
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""
+
     # --- Guardrails (hard limits, not suggestions) ---
     spend_cap_aud_per_week: float = 100.0
     max_calls_per_store_per_day: int = 1
