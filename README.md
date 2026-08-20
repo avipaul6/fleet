@@ -11,6 +11,15 @@ and hands you a ranked action list with your morning coffee.
 
 **Track:** The Taskmaster — background agents that handle the heavy lifting asynchronously.
 
+## Try it in ~5 minutes (no secrets, ~$0)
+
+Deploy the fleet to your own Google Cloud project in replay mode and watch it produce a
+morning brief — a guided Cloud Shell walkthrough does the rest:
+
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/duckfleet/fleet&cloudshell_tutorial=runtimes/gcp_adk/tutorial.md)
+
+Then add Gmail delivery, Twilio calls, or a nightly schedule — see [`runtimes/gcp_adk/README.md`](runtimes/gcp_adk/README.md).
+
 ---
 
 ## Architecture (100% GCP)
