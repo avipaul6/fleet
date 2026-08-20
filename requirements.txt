@@ -9,3 +9,4 @@ google-cloud-bigquery>=3.20
 google-cloud-logging>=3.10
 pytest>=8.0
 google-auth-oauthlib>=1.2   # one-time Gmail OAuth consent (scripts/gmail_authorize.py)
+google-cloud-texttospeech>=2.16   # gated stock-verification call audio

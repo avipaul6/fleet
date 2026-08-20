@@ -17,3 +17,5 @@ build/
 .vscode/
 .idea/
 .DS_Store
+# Generated call audio (real TTS artifacts)
+call_audio/

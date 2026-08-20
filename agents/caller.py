@@ -10,22 +10,26 @@ itself as AI, gets an answer, hangs up politely.
 """
 from google.adk.agents import Agent
 from agents import model_factory
-from guardrails.gates import (gate_phone_call, gate_call_script,
-                              CALL_SCRIPT_PREAMBLE, GateDenied)
+from agents.verification import run_verification_call
+from guardrails.gates import record
 
 
 def request_human_approval(store_name: str, reason: str) -> dict:
-    """Tool: push an approval request (demo: CLI prompt / Firestore doc the UI
-    polls). Returns {'approved': bool}. The agent MUST call this first."""
-    raise NotImplementedError
+    """Tool: record an approval request for a call (prod: a Firestore doc the UI taps).
+    The agent MUST call this first; the human's decision feeds place_verification_call."""
+    ref = record("approval_requested", store=store_name, reason=reason)
+    return {"status": "APPROVAL_REQUIRED", "store": store_name,
+            "reason": reason, "audit_ref": ref}
 
 
-def place_verification_call(phone: str, question: str) -> dict:
-    """Tool: trigger outbound call via Conversational Agents Phone Gateway,
-    return transcript + extracted answer. Question MUST start with
-    CALL_SCRIPT_PREAMBLE (AI self-identification is non-negotiable)."""
-    gate_call_script(question)  # governed: enforces AI self-identification
-    raise NotImplementedError  # TODO: Dialogflow CX Phone Gateway (deferred)
+def place_verification_call(store_name: str, item: str, human_approved: bool = False,
+                            calls_today: int = 0, local_hour: int | None = None) -> dict:
+    """Tool: place the GATED verification call. Delegates to the deterministic gated
+    flow (calling hours + one-call-per-store + human approval + AI self-identification);
+    synthesizes real audio and returns the (labelled-simulated) transcript. A refusal
+    is a correct outcome."""
+    return run_verification_call(store_name, item, human_approved,
+                                 calls_today=calls_today, local_hour=local_hour)
 
 
 caller = Agent(
