@@ -47,6 +47,24 @@ def _store_for(merchant: str):
     return None
 
 
+_PROGRAM_LABEL = {"qantas_ff": "Qantas", "velocity": "Velocity",
+                  "flybuys": "Flybuys", "everyday_rewards": "Everyday Rewards"}
+
+
+def _skip_reason(o: dict, minutes: float, net: float) -> str:
+    """An HONEST reason a value-skip was skipped (not a confabulated 'no points')."""
+    program = o.get("program", "none")
+    if program not in ("none", None) and program not in settings.programs:
+        return f"{_PROGRAM_LABEL.get(program, program)} isn't a program you collect"
+    if minutes and net < 0:
+        return f"the ~{minutes:.0f}-min round trip costs more than it returns"
+    if (o.get("spend_required_aud") or 0) > 0:
+        return f"only worth it if you'd already spend ${int(o['spend_required_aud'])} there"
+    if not o.get("points_out"):
+        return "the deal doesn't state a points amount to value"
+    return "no net value after costs"
+
+
 def _json_array(text: str):
     text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
     i, j = text.find("["), text.rfind("]")
@@ -154,11 +172,15 @@ async def run_fleet(replay: bool = True) -> dict:
             if needs_approval and verdict == "do_it":
                 verdict = "needs_approval"
 
+        reason_note = pref_note
+        if verdict == "skip" and not reason_note:
+            reason_note = _skip_reason(o, tmin, net)
+
         ref = record("offer_assessed", offer=oid, verdict=verdict, net_value_aud=net)
         assessed.append({
             "id": oid, "merchant": o.get("merchant"), "item": o.get("item"),
             "source_url": o.get("source_url"),
-            "category": category, "preference_note": pref_note,
+            "category": category, "reason_note": reason_note,
             "program": o.get("program", "none"), "cents_per_point": val["cents_per_point"],
             "units": val["units"], "spend_aud": val["spend_aud"],
             "total_points": val["total_points"], "offer_value_aud": val["value_aud"],

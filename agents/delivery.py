@@ -58,7 +58,7 @@ def render_text(result: dict) -> str:
     if top:
         cpp = f"  ·  {top.cents_per_point}c/pt" if top.cents_per_point is not None else ""
         L += [_DIV, "⭐ TOP PICK", top.headline,
-              f"   Worth ${top.net_value_aud:,.2f}{cpp}   →  {_verdict_label(top.verdict)}",
+              f"   {_big_value_text(top, by_ref)}   →  {_verdict_label(top.verdict)}",
               f"   {top.reasoning}", *_links_text(top, by_ref), _DIV, ""]
 
     others = [a for a in items if a.verdict in ("do_it", "needs_approval") and a is not top]
@@ -133,6 +133,30 @@ def _by_ref(result: dict) -> dict:
     return {a.get("audit_ref"): a for a in result.get("assessed", [])}
 
 
+_PLABEL = {"qantas_ff": "Qantas", "velocity": "Velocity", "flybuys": "Flybuys",
+           "everyday_rewards": "Everyday Rewards", "none": ""}
+
+
+def _big_value_html(item, by_ref: dict) -> str:
+    """Lead with the POINTS; dollar value is a modelled estimate in subtext."""
+    rec = by_ref.get(item.audit_ref) or {}
+    pts = rec.get("total_points") or 0
+    if pts > 0:
+        prog = _PLABEL.get(rec.get("program", ""), "")
+        return (f'{pts:,}<span style="font-size:14px;font-weight:600;color:#667085">'
+                f' {prog} pts · ~${item.net_value_aud:,.2f} est. value</span>')
+    return f'${item.net_value_aud:,.2f}<span style="font-size:14px;font-weight:600;color:#667085"> net</span>'
+
+
+def _big_value_text(item, by_ref: dict) -> str:
+    rec = by_ref.get(item.audit_ref) or {}
+    pts = rec.get("total_points") or 0
+    if pts > 0:
+        prog = _PLABEL.get(rec.get("program", ""), "")
+        return f"{pts:,} {prog} pts  (~${item.net_value_aud:,.2f} est. value)"
+    return f"Worth ${item.net_value_aud:,.2f}"
+
+
 def _links_html(item, by_ref: dict) -> str:
     url = (by_ref.get(item.audit_ref) or {}).get("source_url")
     btn = ("display:inline-block;padding:6px 12px;border-radius:8px;text-decoration:none;"
@@ -180,8 +204,7 @@ def render_html(result: dict) -> str:
             '<div style="border:1px solid #e4e7ec;border-radius:12px;padding:16px;'
             'margin-bottom:16px;background:#fbfdff">'
             '<div style="font-size:11px;letter-spacing:.5px;color:#667085;font-weight:700">⭐ TOP PICK</div>'
-            f'<div style="font-size:34px;font-weight:800;margin:4px 0">${top.net_value_aud:,.2f}'
-            f'<span style="font-size:14px;font-weight:600;color:#667085"> net{cpp}</span></div>'
+            f'<div style="font-size:34px;font-weight:800;margin:4px 0">{_big_value_html(top, by_ref)}</div>'
             f'<div style="font-weight:600;margin-bottom:6px">{_esc(top.headline)} &nbsp;{_badge(top.verdict)}</div>'
             f'<div style="color:#475467;font-size:14px">{_esc(top.reasoning)}</div>'
             f'<div>{_links_html(top, by_ref)}</div></div>')

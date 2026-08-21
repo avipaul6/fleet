@@ -17,10 +17,11 @@ class Settings(BaseSettings):
     # Plain string -> native Gemini via ADK.
     # "vertex_ai/..." or "litellm/..." prefix -> LiteLlm wrapper (e.g. Claude on
     # Vertex AI Model Garden). Still 100% inside GCP.
-    model_fast: str = "gemini-3.5-flash"      # scouts, worth-it, presenter
-    # Hackathon REQUIRES Gemini 3+. 3.x Pro wasn't available to the project (404), so both
-    # tiers default to the GA 3.5-flash; swap STRONG to a 3.x Pro via env once granted.
-    model_strong: str = "gemini-3.5-flash"    # coordinator, valuer, caller
+    model_fast: str = "gemini-3.7-flash"      # scouts, worth-it, presenter
+    # Newest GA Gemini 3 available to the project (probed 2026-08-21). No 3.x Pro is
+    # available yet (3-pro / 3.5-pro both 404), so both tiers use 3.7-flash — the strongest
+    # option; swap STRONG to a 3.x Pro via env once your project gets access.
+    model_strong: str = "gemini-3.7-flash"    # coordinator, valuer, caller
 
     # --- Household profile (hackathon: hardcode, don't build OAuth) ---
     home_lat: float = -27.5236   # Tarragindi-ish; set yours
