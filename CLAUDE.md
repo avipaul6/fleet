@@ -150,3 +150,63 @@ real TTS audio, clearly labelled "simulated". Honesty > fakery on video.
 Google ADK API surface, Gemini model IDs, Claude-on-Vertex model IDs, Managed Agents
 pricing/beta status. Confirm against official docs (ai.google.dev, cloud.google.com,
 docs.claude.com) — training data may be stale.
+
+---
+
+## CURRENT STATUS & HANDOFF (as of ~2026-08-21)
+
+**Built & working (all end-to-end, tested):**
+- Orchestrator `agents/fleet.py::run_fleet(replay)` chains: get offers (live OzBargain
+  scout OR `fixtures/replay_offers.json`) → **ToS gate** → deterministic valuation +
+  **spend gate** → **preference gate** (avoid / conditional; honest skip reasons) →
+  worth-it (real Maps Routes, or frozen drive in replay) → **presenter** → BigQuery +
+  audit + email. Returns brief + assessed + audit + economics + call_candidates.
+- Agents: `scout_ozbargain`, `valuer` (+`compute_stack_value`), `worth_it` (+`errand_cost`
+  real Routes), `presenter`, `caller` (gated), `onboarding` (chat → `profile.json`).
+- Guardrails (`guardrails/gates.py`): gate_tos, gate_spend, gate_preference,
+  gate_phone_call, gate_call_script (AI self-ID), audit trail (`record`/`audit_trail`).
+- Gated phone call: `agents/verification.py` — real **Twilio** call (via TwiML Bin URL on
+  trial) + real **Cloud Text-to-Speech** audio; every gate enforced. Confirmed a real call.
+- Email: `agents/delivery.py` — multipart **HTML + plain-text**; points-first display,
+  honest skip reasons, **Activate/view + 📅 Google Calendar reminder** links, run-ROI line,
+  "what's real vs simulated" provenance. Real Gmail send works.
+- Cost self-governance: `agents/economics.py` — per-run cost vs value + ROI verdict.
+- History: `agents/history.py` — appends to BigQuery `duckfleet.offer_history`.
+- Evals: 18 red-team tests green (`python -m evals.run`).
+- Dev runners: `scripts/dev_{fleet,scout,valuer,worth_it,caller,replay}.py`; `adk web adk_apps`
+  (scout/valuer/worth_it/presenter/onboarding apps).
+
+**Deployed on GCP (project `duckfleet-agents`, region us-central1, Vertex location=global):**
+- Cloud Run **Job** `duckfleet-nightly` (deploy: `runtimes/gcp_adk/deploy.sh`), scheduled
+  02:00 Australia/Brisbane via Cloud Scheduler `nightly-hunt` (`schedule.sh`).
+- Model: **both tiers `gemini-3.7-flash`** (newest GA; no 3.x Pro available to the project —
+  3-pro/3.5-pro 404). `.env` local + deploy.sh both set it.
+- Secrets in Secret Manager: `duckfleet-gmail-{client-id,client-secret,refresh-token}`.
+  Twilio creds are laptop-only (calls are approval-triggered, not in the headless nightly).
+- BigQuery sink on (`DUCKFLEET_BIGQUERY_DATASET=duckfleet`).
+- One-click deploy: README "Open in Cloud Shell" badge → `runtimes/gcp_adk/{tutorial.md,quickstart.sh}`.
+- **`.env` is laptop-only** (gitignored); the cloud job's config = deploy.sh env vars +
+  Secret Manager. A redeploy (`deploy.sh`) is required to push code/config changes to the nightly.
+
+**Docs/submission:** README refreshed (accurate, flash/pro wording, no "$0" claims);
+`docs/architecture.svg` (GCP-styled, accurate); demo materials in `demo/gcp-hackathon/`:
+`DEMO_SCRIPT.md` (podcast-style beat sheet), `PODCAST_SOURCE.md` (NotebookLM source + prompt —
+already generated a good ~2.5-min episode), `SHOT_LIST.md` (what to record).
+
+**What's LEFT (hackathon, due 2026-08-31):**
+1. Record the demo video (InShot; podcast audio + shot-list clips + Veo cold-open of the
+   duck→business-class; add "BigW/Australia" as text overlays — Veo garbles logos).
+2. Devpost write-up (problem/solution/how-built/challenges/what's next) + submit.
+3. Bonus points: publish the NotebookLM podcast; #AllThingsAgentic on social.
+
+**Roadmap (post-hackathon, real-life):**
+- **Shopping-habits valuation** (bounded, high value): add `regular_merchants` to profile;
+  in `_value()` treat spend-you'd-make-anyway as free → fixes Flybuys/EDR "spend $X get pts"
+  offers valuing to $0. This is the real fix behind the honest-reasons patch.
+- Online vs in-store `fulfilment` flag (no drive penalty for online).
+- **Behaviour-learning agent** — adapts the profile from feedback/behaviour over time.
+- Redemption-side ("where can my points take me") — see `devlog/2026-08-19-roadmap-redemption.md`.
+- Loyalty-account actuation (auto-activate boosts) — needs auth/ToS review; user-session only.
+
+**Working preferences:** user drives all commits/pushes (do NOT commit); prefers fixing
+root cause over workarounds; keep public voice reading as a real project, not hackathon-only.
