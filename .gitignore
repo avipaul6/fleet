@@ -21,3 +21,8 @@ build/
 .DS_Store
 # Generated call audio (real TTS artifacts)
 call_audio/
+# Generated diagram output (the tracked copy lives at docs/architecture.png)
+demo/gcp-hackathon/duckfleet_architecture.png
+demo/gcp-hackathon/duckfleet_architecture.svg
+# Local brief preview render
+demo_brief.html

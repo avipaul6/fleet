@@ -10,6 +10,7 @@ A runtime (Cloud Run job, etc.) just calls run_fleet(); it holds no platform cod
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
@@ -88,7 +89,13 @@ async def _run_agent(agent, app: str, text: str, cost=None) -> str:
 
 async def _get_offers(replay: bool, cost=None) -> list[dict]:
     if replay:
-        return json.loads((_FIX / "replay_offers.json").read_text())["offers"]
+        # Default replay set, or override with DUCKFLEET_REPLAY_FIXTURE (path or
+        # bare filename under fixtures/) to run/record an alternate deterministic brief.
+        fixture = os.environ.get("DUCKFLEET_REPLAY_FIXTURE", "replay_offers.json")
+        path = Path(fixture)
+        if not path.is_absolute():
+            path = _FIX / path
+        return json.loads(path.read_text())["offers"]
     scouted = _json_array(await _run_agent(
         scout_ozbargain, "fleet-scout", "Scout OzBargain for loyalty-points offers now.", cost))
     for o in scouted:

@@ -28,7 +28,9 @@ nightly schedule afterwards — see [`runtimes/gcp_adk/README.md`](runtimes/gcp_
 
 ## Architecture
 
-![DuckFleet architecture](docs/architecture.svg)
+![DuckFleet architecture](docs/architecture.png)
+
+<sub>Rendered with official Google Cloud icons via [`demo/gcp-hackathon/architecture_diagram.py`](demo/gcp-hackathon/architecture_diagram.py) (mingrammer `diagrams`). Regenerate after any pipeline change.</sub>
 
 Google Cloud throughout (telephony via Twilio): **Cloud Scheduler** fires a nightly
 **Cloud Run Job** that runs the ADK fleet — scouts → valuer → guardrails → worth-it →
