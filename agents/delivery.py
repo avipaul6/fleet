@@ -22,10 +22,16 @@ _TOKEN_URI = "https://oauth2.googleapis.com/token"
 _SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 
 
-def gmail_configured() -> bool:
-    """True only when every secret + recipient is present."""
+def gmail_secrets_present() -> bool:
+    """True when the send credentials exist (recipient not required — the caller may
+    pass an explicit `to`, e.g. a user's verified email for an on-demand sample)."""
     return bool(settings.gmail_client_id and settings.gmail_client_secret
-                and settings.gmail_refresh_token and settings.notify_email)
+                and settings.gmail_refresh_token)
+
+
+def gmail_configured() -> bool:
+    """True only when every secret + the default recipient is present."""
+    return bool(gmail_secrets_present() and settings.notify_email)
 
 
 _DIV = "═" * 32   # heavy divider
@@ -258,14 +264,17 @@ def _access_token() -> str:
     return creds.token
 
 
-def send_brief(subject: str, body_text: str, body_html: str | None = None) -> dict:
-    """Send the brief to settings.notify_email as the configured sender. Sends
-    multipart/alternative (plain text + optional HTML) so clients that block HTML fall
-    back to plain text. Raises if Gmail isn't configured — gate on gmail_configured()."""
-    if not gmail_configured():
-        raise RuntimeError("Gmail not configured (set DUCKFLEET_GMAIL_* + DUCKFLEET_NOTIFY_EMAIL).")
+def send_brief(subject: str, body_text: str, body_html: str | None = None,
+               to: str | None = None) -> dict:
+    """Send the brief as the configured sender. Recipient defaults to settings.notify_email
+    (the nightly job); pass `to` to send to a specific address (e.g. a user's VERIFIED
+    sign-in email for an on-demand sample). Sends multipart/alternative (plain text +
+    optional HTML) so clients that block HTML fall back. Raises if send creds are missing."""
+    recipient = to or settings.notify_email
+    if not gmail_secrets_present() or not recipient:
+        raise RuntimeError("Gmail not configured (set DUCKFLEET_GMAIL_* and a recipient).")
     msg = EmailMessage()
-    msg["To"] = settings.notify_email
+    msg["To"] = recipient
     msg["From"] = settings.gmail_sender or "me"
     msg["Subject"] = subject
     msg.set_content(body_text)                      # plain-text fallback (always present)

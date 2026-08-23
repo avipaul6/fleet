@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     # Set (e.g. "duckfleet") to append each run's offers to BigQuery offer_history.
     # Empty = disabled (best-effort sink; never blocks the brief).
     bigquery_dataset: str = ""
+    # Set (e.g. "default") to load the household profile from the Firestore doc the hosted
+    # onboarding page writes (duckfleet_profiles/<id>). Empty = use profile.json / env only.
+    profile_id: str = ""
 
     # --- Model tiers (THE SWITCH) ---
     # Plain string -> native Gemini via ADK.
@@ -67,13 +70,29 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Apply the onboarding profile (profile.json) on top of env/defaults, if present.
-# This is exactly what the onboarding agent writes — the fleet reads it here.
+# Apply the onboarding profile on top of env/defaults. Two sources, lowest→highest:
+#   1. profile.json  — what the local `adk web` onboarding agent writes.
+#   2. Firestore doc — what the hosted Cloud Run onboarding page writes (if DUCKFLEET_PROFILE_ID
+#      is set). This lets a user onboard on a web page and have tonight's run pick it up,
+#      with no redeploy. Both are best-effort: a failure leaves env/defaults intact.
+def _overlay(profile: dict) -> None:
+    for _k, _v in profile.items():
+        if hasattr(settings, _k) and _v not in (None, [], {}):
+            setattr(settings, _k, _v)
+
+
 _profile_path = Path(__file__).resolve().parent.parent / "profile.json"
 if _profile_path.exists():
     try:
-        for _k, _v in json.loads(_profile_path.read_text()).items():
-            if hasattr(settings, _k) and _v not in (None, [], {}):
-                setattr(settings, _k, _v)
+        _overlay(json.loads(_profile_path.read_text()))
+    except Exception:
+        pass
+
+if settings.profile_id:
+    try:
+        from agents.profile_store import read_profile
+        _remote = read_profile(settings.profile_id)
+        if _remote:
+            _overlay(_remote)
     except Exception:
         pass

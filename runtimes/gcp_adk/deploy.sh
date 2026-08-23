@@ -13,6 +13,9 @@ PROJECT=duckfleet-agents
 REGION=us-central1
 JOB=duckfleet-nightly
 REPLAY="${DUCKFLEET_REPLAY:-false}"   # false = live hunt; set true for the hero-duck demo brief
+# Set to the id the onboarding page writes (e.g. "default") to read the household profile from
+# Firestore (duckfleet_profiles/<id>). Blank = use profile.json / env defaults only.
+PROFILE_ID="${DUCKFLEET_PROFILE_ID:-}"
 
 # Non-secret Gmail config (read from .env; never echoed)
 NOTIFY_EMAIL=$(grep -E '^DUCKFLEET_NOTIFY_EMAIL=' .env | head -1 | cut -d= -f2-)
@@ -33,15 +36,16 @@ for s in duckfleet-gmail-client-id duckfleet-gmail-client-secret duckfleet-gmail
   gcloud secrets add-iam-policy-binding "$s" --project "$PROJECT" \
     --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor -q >/dev/null
 done
-# BigQuery: write offer_history + run query/load jobs
-for role in roles/bigquery.dataEditor roles/bigquery.jobUser; do
+# BigQuery: write offer_history + run query/load jobs. Datastore: read the onboarding
+# profile from Firestore (duckfleet_profiles/<id>) when DUCKFLEET_PROFILE_ID is set.
+for role in roles/bigquery.dataEditor roles/bigquery.jobUser roles/datastore.user; do
   gcloud projects add-iam-policy-binding "$PROJECT" \
     --member="serviceAccount:$SA" --role="$role" --condition=None -q >/dev/null
 done
 
 echo "== Deploy Cloud Run Job (REPLAY=$REPLAY) =="
 gcloud run jobs deploy "$JOB" --source . --region "$REGION" --project "$PROJECT" \
-  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=$PROJECT,GOOGLE_CLOUD_LOCATION=global,DUCKFLEET_PROJECT_ID=$PROJECT,DUCKFLEET_REGION=$REGION,DUCKFLEET_MODEL_FAST=gemini-3.7-flash,DUCKFLEET_MODEL_STRONG=gemini-3.7-flash,DUCKFLEET_REPLAY=$REPLAY,DUCKFLEET_BIGQUERY_DATASET=duckfleet,DUCKFLEET_GMAIL_SENDER=$SENDER,DUCKFLEET_NOTIFY_EMAIL=$NOTIFY_EMAIL" \
+  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=$PROJECT,GOOGLE_CLOUD_LOCATION=global,DUCKFLEET_PROJECT_ID=$PROJECT,DUCKFLEET_REGION=$REGION,DUCKFLEET_MODEL_FAST=gemini-3.7-flash,DUCKFLEET_MODEL_STRONG=gemini-3.7-flash,DUCKFLEET_REPLAY=$REPLAY,DUCKFLEET_PROFILE_ID=$PROFILE_ID,DUCKFLEET_BIGQUERY_DATASET=duckfleet,DUCKFLEET_GMAIL_SENDER=$SENDER,DUCKFLEET_NOTIFY_EMAIL=$NOTIFY_EMAIL" \
   --set-secrets="DUCKFLEET_GMAIL_CLIENT_ID=duckfleet-gmail-client-id:latest,DUCKFLEET_GMAIL_CLIENT_SECRET=duckfleet-gmail-client-secret:latest,DUCKFLEET_GMAIL_REFRESH_TOKEN=duckfleet-gmail-refresh-token:latest"
 
 echo "== Smoke test: run once now =="
