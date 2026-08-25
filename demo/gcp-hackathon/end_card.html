@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — End Card</title>
+<!--
+  Video end-card (1920x1080). Open in a browser, then screen-capture / screenshot the
+  stage for the final ~5s of the reel. The QR points at your sample-brief demo; the
+  GitHub line is the one-click Cloud Shell deploy. QR image = assets/onboard-qr.png.
+  Swap the QR by replacing that file (keep the filename) or edit the <img src> below.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0b1020; --navy2:#131a33; --ink:#eaf0ff; --muted:#9fb0d0;
+    --coral:#ff6b5e; --duck:#ffd54a; --panel:#182142; --line:#2a355e;
+  }
+  *{margin:0; padding:0; box-sizing:border-box}
+  html,body{background:#05070f; font-family:"Nunito",system-ui,Arial,sans-serif}
+  /* Fixed 16:9 stage; scaled to fit the window so a 1080p capture is crisp. */
+  .wrap{min-height:100vh; display:grid; place-items:center}
+  .stage{
+    position:relative; width:1920px; height:1080px; overflow:hidden;
+    background:radial-gradient(1200px 700px at 50% -10%, #1a2450 0%, var(--navy) 55%, #070b18 100%);
+    color:var(--ink);
+    transform:scale(calc(min(100vw/1920, 100vh/1080))); transform-origin:center;
+  }
+  /* starfield */
+  .stars{position:absolute; inset:0; background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, #fff9 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 70% 20%, #fff7 0, transparent 100%),
+      radial-gradient(1px 1px at 40% 60%, #fff6 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 85% 65%, #fff7 0, transparent 100%),
+      radial-gradient(1px 1px at 55% 40%, #fff5 0, transparent 100%),
+      radial-gradient(1px 1px at 12% 75%, #fff5 0, transparent 100%);
+    opacity:.7}
+  .moon{position:absolute; top:70px; right:120px; width:120px; height:120px; border-radius:50%;
+    background:radial-gradient(circle at 38% 35%, #fff 0, #dfe7ff 45%, #aab6e0 100%);
+    box-shadow:0 0 80px 20px #cdd8ff55}
+
+  .inner{position:absolute; inset:0; padding:90px 110px; display:flex; flex-direction:column}
+
+  /* header */
+  .brand{display:flex; align-items:center; gap:18px}
+  .brand .duck{font-size:64px; line-height:1}
+  .brand h1{font-size:64px; font-weight:900; letter-spacing:.5px}
+  .brand h1 span{color:var(--duck)}
+  .tag{margin-top:10px; font-size:26px; color:var(--muted); font-weight:600}
+
+  /* body: capabilities (left) + two CTAs (right) */
+  .body{flex:1; display:grid; grid-template-columns:1fr 720px; gap:70px; align-items:center; margin-top:24px}
+
+  .doeslabel{font-size:20px; letter-spacing:3px; text-transform:uppercase; color:var(--coral); font-weight:800; margin-bottom:22px}
+  .chips{display:flex; flex-wrap:wrap; gap:16px; max-width:820px}
+  .chip{border:1.5px solid var(--line); background:#0f1730; border-radius:999px;
+    padding:14px 22px; font-size:26px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:12px}
+  .chip .i{font-size:26px}
+  .chip.key{border-color:var(--coral); background:#1a1330; color:#ffd7d2}
+
+  /* CTA column */
+  .ctas{display:flex; flex-direction:column; gap:26px}
+  .cta{background:var(--panel); border:1.5px solid var(--line); border-radius:22px; padding:26px 30px; display:flex; align-items:center; gap:26px}
+  .cta .head{font-size:22px; letter-spacing:2px; text-transform:uppercase; font-weight:800}
+  .cta .sub{font-size:24px; color:var(--muted); font-weight:600; margin-top:6px}
+  .cta .mono{font-size:26px; font-weight:800; color:var(--duck); margin-top:10px; font-family:"Nunito",monospace}
+
+  .qrbox{background:#fff; border-radius:16px; padding:16px; flex:0 0 auto}
+  .qrbox img{display:block; width:240px; height:240px; image-rendering:pixelated}
+  .cta.try .head{color:var(--duck)}
+  .cta.deploy .head{color:#7fd0ff}
+  .badge{display:inline-flex; align-items:center; gap:12px; margin-top:14px;
+    background:#0f1730; border:1.5px solid #2b6cff55; color:#bcd6ff; font-weight:800;
+    font-size:22px; padding:12px 18px; border-radius:12px}
+  .badge .g{font-size:24px}
+
+  /* footer tagline */
+  .foot{margin-top:8px; font-size:28px; font-weight:800; color:#cdd8ff}
+  .foot em{color:var(--duck); font-style:normal}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+    <div class="stars"></div>
+    <div class="moon"></div>
+    <div class="inner">
+
+      <header>
+        <div class="brand"><span class="duck">🦆</span><h1>Duck<span>Fleet</span></h1></div>
+        <div class="tag">An agent fleet that hunts loyalty points while you sleep.</div>
+      </header>
+
+      <div class="body">
+        <!-- what the agents do -->
+        <div>
+          <div class="doeslabel">What the fleet does</div>
+          <div class="chips">
+            <div class="chip key"><span class="i">🚫</span>Refuses bad errands</div>
+            <div class="chip key"><span class="i">📞</span>Gated AI voice call</div>
+            <div class="chip"><span class="i">🔎</span>Scouts nightly</div>
+            <div class="chip"><span class="i">🧮</span>Stacks the maths</div>
+            <div class="chip"><span class="i">🛡️</span>Guardrails on every action</div>
+            <div class="chip"><span class="i">📊</span>Knows its own ROI</div>
+          </div>
+        </div>
+
+        <!-- two ways to try -->
+        <div class="ctas">
+          <div class="cta try">
+            <div class="qrbox"><img src="assets/onboard-qr.png" alt="Scan for a sample brief"></div>
+            <div>
+              <div class="head">See it — scan</div>
+              <div class="sub">A real sample morning brief.<br>No setup, no install.</div>
+            </div>
+          </div>
+
+          <div class="cta deploy">
+            <div>
+              <div class="head">Run it — one click</div>
+              <div class="sub">Deploy the whole fleet to <b>your own</b> Google Cloud.</div>
+              <div class="mono">github.com/duckfleet/fleet</div>
+              <div class="badge"><span class="g">▶</span> Open in Cloud Shell</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot">Hunts hard, inside the lines. <em>The next duck won't get past it.</em></div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
