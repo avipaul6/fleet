@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — Submission Image (3:2)</title>
+<!--
+  Devpost submission image (1200x800, 3:2). Open in a browser, full-screen, screenshot the stage.
+  OPTIONAL: drop a Veo/brief frame at assets/hero.jpg for the right panel; gradient fallback otherwise.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0b1020;--navy2:#131a33;--ink:#eaf0ff;--muted:#9fb0d0;--duck:#ffd54a;--coral:#ff6b5e;--line:#2a355e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#05070f;font-family:"Nunito",system-ui,Arial,sans-serif}
+  .wrap{min-height:100vh;display:grid;place-items:center}
+  .stage{position:relative;width:1200px;height:800px;overflow:hidden;color:var(--ink);
+    background:radial-gradient(900px 600px at 50% -8%,#1a2450 0%,var(--navy) 55%,#070b18 100%);
+    transform:scale(calc(min(100vw/1200,100vh/800)));transform-origin:center}
+  .stars{position:absolute;inset:0;opacity:.6;background-image:
+    radial-gradient(1.6px 1.6px at 20% 22%,#fff9 0,transparent 100%),
+    radial-gradient(1.4px 1.4px at 68% 16%,#fff7 0,transparent 100%),
+    radial-gradient(1.4px 1.4px at 44% 62%,#fff6 0,transparent 100%),
+    radial-gradient(1.4px 1.4px at 86% 55%,#fff7 0,transparent 100%)}
+  .moon{position:absolute;top:56px;right:88px;width:96px;height:96px;border-radius:50%;
+    background:radial-gradient(circle at 38% 35%,#fff 0,#dfe7ff 45%,#aab6e0 100%);box-shadow:0 0 70px 16px #cdd8ff55}
+  .inner{position:absolute;inset:0;padding:72px 80px;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand .d{font-size:60px}
+  .brand h1{font-size:70px;font-weight:900;letter-spacing:.5px}
+  .brand h1 span{color:var(--duck)}
+  .tag{margin-top:14px;font-size:30px;font-weight:700;color:var(--muted);max-width:900px}
+  .hook{margin-top:40px;font-size:44px;font-weight:900;line-height:1.08;max-width:940px}
+  .hook .y{color:var(--duck)}
+  .chips{margin-top:auto;display:flex;flex-wrap:wrap;gap:16px}
+  .chip{border:1.5px solid var(--line);background:#0f1730;border-radius:999px;padding:14px 24px;
+    font-size:26px;font-weight:800}
+  .chip.key{border-color:var(--coral);background:#1a1330;color:#ffd7d2}
+  .footer{margin-top:26px;display:flex;justify-content:space-between;align-items:baseline;gap:24px}
+  .foot{font-size:24px;font-weight:800;color:#cdd8ff}
+  .foot em{color:var(--duck);font-style:normal}
+  .gcp{font-size:20px;font-weight:800;color:var(--muted);letter-spacing:1px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+    <div class="stars"></div>
+    <div class="moon"></div>
+    <div class="inner">
+      <div class="brand"><span class="d">🦆</span><h1>Duck<span>Fleet</span></h1></div>
+      <div class="tag">An agent fleet that hunts loyalty points while you sleep.</div>
+
+      <div class="hook">The $3.50 rubber duck that was secretly a <span class="y">business-class seat</span> — hunted automatically, overnight, and <span class="y">governed</span>.</div>
+
+      <div class="chips">
+        <div class="chip key">🚫 Refuses bad errands</div>
+        <div class="chip key">📞 Gated AI voice call</div>
+        <div class="chip">🛡️ Guardrails on every action</div>
+        <div class="chip">📊 Knows its own ROI</div>
+      </div>
+      <div class="footer">
+        <div class="foot">Hunts hard, inside the lines. <em>The next duck won't get past it.</em></div>
+        <div class="gcp">Built on Google Cloud · ADK + Vertex AI</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

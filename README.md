@@ -28,9 +28,9 @@ nightly schedule afterwards — see [`runtimes/gcp_adk/README.md`](runtimes/gcp_
 
 ## Architecture
 
-![DuckFleet architecture](docs/architecture.png)
+![DuckFleet architecture](docs/duckfleet-architecture-gcp.png)
 
-<sub>Rendered with official Google Cloud icons via [`demo/gcp-hackathon/architecture_diagram.py`](demo/gcp-hackathon/architecture_diagram.py) (mingrammer `diagrams`). Regenerate after any pipeline change.</sub>
+<sub>Nightly &amp; governed on Google Cloud: Cloud Scheduler → a Cloud Run Job runs the ADK fleet (scouts → valuer → guardrails → worth-it → presenter → gated caller) on Vertex AI, using Maps Routes, Text-to-Speech, BigQuery, Cloud Logging and Secret Manager, delivering via Gmail, Twilio and Calendar.</sub>
 
 Google Cloud throughout (telephony via Twilio): **Cloud Scheduler** fires a nightly
 **Cloud Run Job** that runs the ADK fleet — scouts → valuer → guardrails → worth-it →
@@ -93,6 +93,37 @@ adk web adk_apps              # chat with each agent (incl. onboarding) in the d
 
 Deploy to Google Cloud: see [`runtimes/gcp_adk/README.md`](runtimes/gcp_adk/README.md)
 (Cloud Run Job + Cloud Scheduler; scales to zero when idle).
+
+## 🧪 Reproducible testing
+
+Everything here is **deterministic** — same input, same output — so anyone can reproduce
+DuckFleet's results without touching our data or credentials.
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 1. Red-team the guardrails — 18 failure-mode tests. FULLY LOCAL: no Google Cloud, no keys.
+python -m evals.run
+#    Exercises the spend / ToS / preference / call gates and the deterministic
+#    valuation + worth-it maths directly. Expect: all 18 pass.
+
+# 2. Deterministic replay → a known-good morning brief from frozen fixtures.
+python scripts/dev_fleet.py
+
+# 3. Reproduce the governance "refusals" beat — an over-distance pickup and a
+#    "no new credit cards" offer, each skipped with an honest reason.
+DUCKFLEET_REPLAY_FIXTURE=demo_skips.json python scripts/dev_fleet.py
+```
+
+**What needs what:**
+- **Step 1 needs no cloud** — it's the fastest way to verify the governance behaviour and is
+  the suite that runs in CI. All maths is deterministic Python (the LLM never does arithmetic).
+- **Steps 2–3** run the full fleet on **frozen fixtures** (drive times captured once from the
+  Maps Routes API, then frozen), so the brief is stable across runs. The presenter step calls
+  Vertex AI, so set up ADC first — `gcloud auth application-default login` — or use the values
+  in `.env`. Fixtures live in [`fixtures/`](fixtures/); `--replay` is the same code path the
+  nightly Cloud Run Job runs in production.
 
 ## Repo map
 
