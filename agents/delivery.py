@@ -147,11 +147,11 @@ def _big_value_html(item, by_ref: dict) -> str:
     """Lead with the POINTS; dollar value is a modelled estimate in subtext."""
     rec = by_ref.get(item.audit_ref) or {}
     pts = rec.get("total_points") or 0
+    sub = ("font-size:17px;font-weight:600;color:#6a675e;letter-spacing:normal;margin-left:8px")
     if pts > 0:
         prog = _PLABEL.get(rec.get("program", ""), "")
-        return (f'{pts:,}<span style="font-size:14px;font-weight:600;color:#667085">'
-                f' {prog} pts · ~${item.net_value_aud:,.2f} est. value</span>')
-    return f'${item.net_value_aud:,.2f}<span style="font-size:14px;font-weight:600;color:#667085"> net</span>'
+        return (f'{pts:,}<span style="{sub}">{prog} pts · ~${item.net_value_aud:,.2f}</span>')
+    return f'${item.net_value_aud:,.2f}<span style="{sub}">net</span>'
 
 
 def _big_value_text(item, by_ref: dict) -> str:
@@ -164,14 +164,15 @@ def _big_value_text(item, by_ref: dict) -> str:
 
 
 def _links_html(item, by_ref: dict) -> str:
+    """Editorial underlined text links (not buttons), to match the brief's typographic look."""
     url = (by_ref.get(item.audit_ref) or {}).get("source_url")
-    btn = ("display:inline-block;padding:6px 12px;border-radius:8px;text-decoration:none;"
-           "font-size:13px;font-weight:600;margin:8px 8px 0 0")
+    base = "text-decoration:none;font-weight:600;font-size:15px;padding-bottom:1px;border-bottom:2px solid"
     out = []
     if url:
-        out.append(f'<a href="{_esc(url)}" style="{btn};background:#1a7f37;color:#fff">Activate / view ↗</a>')
-    out.append(f'<a href="{_esc(_calendar_url(item.headline))}" style="{btn};'
-               f'background:#eef2ff;color:#3538cd">📅 Add reminder</a>')
+        out.append(f'<a href="{_esc(url)}" style="{base} #2b6cff55;color:#2b6cff">Activate ↗</a>')
+    ml = "margin-left:24px" if out else ""
+    out.append(f'<a href="{_esc(_calendar_url(item.headline))}" style="{base} #e6e1d5;color:#6a675e;{ml}">'
+               f'Add a reminder</a>')
     return "".join(out)
 
 
@@ -184,71 +185,113 @@ def _links_text(item, by_ref: dict) -> list[str]:
     return lines
 
 
+_NUM = {0: "nothing", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+        6: "six", 7: "seven", 8: "eight", 9: "nine"}
+
+
+def _word(n: int) -> str:
+    return _NUM.get(n, str(n))
+
+
 def render_html(result: dict) -> str:
-    """Light, email-safe HTML (inline styles, tables, no images). Sent as the HTML
-    alternative alongside the plain-text version — clients that block HTML fall back."""
+    """Editorial, email-safe HTML: type + whitespace do the hierarchy (no images, no
+    dashboard). Inline styles, solid highlight, and tables for side-by-side rows so it
+    survives Gmail/Outlook; a system-font stack stands in where web fonts are stripped.
+    Sent as the HTML alternative alongside plain text; clients that block HTML fall back."""
     mode = result.get("mode", "live")
     items = sorted(result.get("brief", []), key=lambda a: a.rank)
     by_ref = _by_ref(result)
     excluded = result.get("excluded_tos", 0)
-    top = next((a for a in items if a.verdict in ("do_it", "needs_approval")), None)
-    others = [a for a in items if a.verdict in ("do_it", "needs_approval") and a is not top]
+    do_items = [a for a in items if a.verdict in ("do_it", "needs_approval")]
+    top = do_items[0] if do_items else None
+    others = do_items[1:]
     skips = [a for a in items if a.verdict == "skip"]
     calls = result.get("call_candidates", [])
     econ = result.get("economics")
+    n_reviewed = result.get("n_candidates") or len(items)
+    n_do, n_skip = len(do_items), len(skips)
     banner = "SIMULATION · replay fixtures" if mode == "replay" else "LIVE · OzBargain feed"
 
-    P = ['<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;'
-         'max-width:640px;margin:0 auto;color:#1a1a1a;line-height:1.45">']
-    P.append('<div style="font-size:22px;font-weight:800">🦆 DuckFleet — Daily Hunt</div>')
-    P.append(f'<div style="color:#667085;font-size:13px;margin:2px 0 16px">'
-             f'{date.today():%-d %b %Y} · {banner}</div>')
+    INK, SOFT, RULE, PAPER, MARK = "#181812", "#6a675e", "#e6e1d5", "#faf7f0", "#ffe08a"
+    FONT = ("'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,"
+            "Helvetica,Arial,sans-serif")
+    rule = f'<div style="height:1px;background:{RULE};margin:34px 0"></div>'
+
+    def kicker(t: str) -> str:
+        return (f'<div style="font-size:12px;font-weight:700;letter-spacing:2px;'
+                f'text-transform:uppercase;color:{SOFT}">{t}</div>')
+
+    P = [f'<div style="background:#eceae3;padding:24px 12px;margin:0">'
+         f'<div style="font-family:{FONT};max-width:600px;margin:0 auto;background:{PAPER};'
+         f'border-radius:18px;padding:44px 40px 32px;color:{INK};line-height:1.5">']
+
+    # masthead (table for reliable left/right in email)
+    P.append(
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:38px"><tr>'
+        '<td style="font-weight:700;font-size:19px">🦆 DuckFleet</td>'
+        f'<td align="right" style="color:{SOFT};font-size:12px;font-weight:600;letter-spacing:.4px">'
+        f'{date.today():%-d %b} · {banner}</td></tr></table>')
+
+    # headline carries the summary — no pills
+    offers = f"{n_reviewed} offer" + ("" if n_reviewed == 1 else "s")
+    parts = []
+    if n_do:
+        parts.append(f"Kept {_word(n_do)}")
+    if n_skip:
+        parts.append(f"Refused {_word(n_skip)}")
+    line2 = (". ".join(parts) + ".") if parts else "Nothing cleared the bar tonight."
+    P.append(
+        f'<div style="font-size:42px;line-height:1.1;font-weight:700;letter-spacing:-1px">'
+        f'Checked <span style="background:{MARK};padding:0 4px;border-radius:2px">{offers}</span> '
+        f'overnight.<br>{line2}</div>')
+    P.append(f'<div style="margin-top:16px;font-size:16px;line-height:1.55;color:{SOFT};'
+             f'font-weight:500">Ran while you slept. Here\'s the short version, and what I passed on.</div>')
 
     if top:
-        cpp = f' · {top.cents_per_point}c/pt' if top.cents_per_point is not None else ''
-        P.append(
-            '<div style="border:1px solid #e4e7ec;border-radius:12px;padding:16px;'
-            'margin-bottom:16px;background:#fbfdff">'
-            '<div style="font-size:11px;letter-spacing:.5px;color:#667085;font-weight:700">⭐ TOP PICK</div>'
-            f'<div style="font-size:34px;font-weight:800;margin:4px 0">{_big_value_html(top, by_ref)}</div>'
-            f'<div style="font-weight:600;margin-bottom:6px">{_esc(top.headline)} &nbsp;{_badge(top.verdict)}</div>'
-            f'<div style="color:#475467;font-size:14px">{_esc(top.reasoning)}</div>'
-            f'<div>{_links_html(top, by_ref)}</div></div>')
-
-    if others:
-        P.append('<div style="font-weight:700;margin:14px 0 4px">✅ Also worth doing</div>')
+        P.append(rule + kicker("Worth doing"))
+        P.append(f'<div style="font-size:58px;font-weight:700;letter-spacing:-2px;line-height:1;'
+                 f'margin-top:12px">{_big_value_html(top, by_ref)}</div>')
+        P.append(f'<div style="margin-top:12px;font-size:17px;line-height:1.5;font-weight:500">'
+                 f'{_esc(top.reasoning)}</div>')
+        P.append(f'<div style="margin-top:20px">{_links_html(top, by_ref)}</div>')
         for a in others:
-            P.append(f'<div style="border-top:1px solid #f0f0f0;padding:8px 0;font-size:14px">'
-                     f'{_esc(a.headline)} — ${a.net_value_aud:,.0f} &nbsp;{_badge(a.verdict)}'
-                     f'<div>{_links_html(a, by_ref)}</div></div>')
+            # headline already carries the net value (e.g. "… ($5 net)"), so don't repeat it
+            P.append(f'<div style="margin-top:22px;font-weight:600;font-size:17px">{_esc(a.headline)}</div>'
+                     f'<div style="margin-top:12px">{_links_html(a, by_ref)}</div>')
 
     if skips:
-        lis = "".join(f'<li style="margin:5px 0"><span style="color:#344054">{_esc(a.headline)}</span>'
-                      f' — <span style="color:#667085">{_esc(a.reasoning)}</span></li>' for a in skips)
-        P.append('<div style="font-weight:700;margin:16px 0 4px">⛔ Skipped</div>'
-                 f'<ul style="margin:0;padding-left:18px;font-size:14px">{lis}</ul>')
+        P.append(rule + kicker("Refused, on purpose"))
+        for a in skips:
+            P.append(f'<div style="margin-top:22px"><div style="font-size:18px;font-weight:700">'
+                     f'{_esc(a.headline)}</div><div style="margin-top:5px;font-size:15px;line-height:1.5;'
+                     f'color:{SOFT};font-weight:500">{_esc(a.reasoning)}</div></div>')
 
     if excluded:
-        P.append(f'<div style="margin:12px 0;color:#b42318;font-size:14px">🚫 {excluded} offer(s) '
-                 'excluded for ToS risk before review</div>')
+        P.append(f'<div style="margin-top:22px;color:{SOFT};font-size:15px">Plus {excluded} '
+                 f'offer{"" if excluded == 1 else "s"} blocked for ToS risk before I looked closer.</div>')
 
     if calls:
-        lis = "".join(f'<li style="margin:3px 0">{_esc(c["merchant"])} — {_esc(c["item"])}</li>' for c in calls)
-        P.append('<div style="border:1px dashed #c9d2e3;border-radius:10px;padding:10px 14px;'
-                 'margin:16px 0;background:#fafbff;font-size:14px"><b>📞 Stock check</b> — reply '
-                 '<b>APPROVE</b> and the fleet will call to verify (it self-identifies as AI):'
-                 f'<ul style="margin:6px 0 0;padding-left:18px">{lis}</ul></div>')
+        names = ", ".join(_esc(c["merchant"]) for c in calls)
+        P.append(rule + kicker("Waiting on you"))
+        P.append(f'<div style="margin-top:12px;font-size:21px;line-height:1.4;font-weight:600;'
+                 f'letter-spacing:-.3px">Reply <span style="background:{INK};color:{PAPER};padding:1px 9px;'
+                 f'border-radius:6px;font-weight:700">APPROVE</span> and I\'ll call {names} to check '
+                 f'stock. I\'ll tell them I\'m an AI.</div>')
 
+    # footer (table for left/right)
+    cost = ""
     if econ:
-        c, v, roi = econ.get("cost_aud", 0), econ.get("value_aud", 0), econ.get("roi")
-        if econ.get("verdict") == "quiet_night":
-            etxt = f'🧮 ~${c:.3f} compute · nothing cleared the bar — a quiet, cheap night.'
-        else:
-            etxt = f'🧮 ~${c:.3f} compute → ${v:,.2f} value' + (f' (≈{roi:,.0f}× return)' if roi else '')
-        P.append(f'<div style="margin:16px 0;font-size:13px;color:#475467">{etxt}</div>')
+        c = econ.get("cost_aud", 0)
+        cost = (f"A quiet night — cost ${c:.3f} to run."
+                if econ.get("verdict") == "quiet_night" else f"Cost ${c:.3f} to run.")
+    P.append(
+        f'<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;'
+        f'border-top:1px solid {RULE}"><tr>'
+        f'<td style="padding-top:14px;color:{SOFT};font-size:13px;font-weight:500">{cost}</td>'
+        f'<td align="right" style="padding-top:14px;color:{SOFT};font-size:13px;font-weight:500">'
+        f'Reply STOP to pause the fleet.</td></tr></table>')
 
-    P.append('<div style="border-top:1px solid #eee;margin-top:16px;padding-top:10px;'
-             'color:#98a2b3;font-size:12px">Reply STOP to pause the fleet.</div></div>')
+    P.append('</div></div>')
     return "".join(P)
 
 

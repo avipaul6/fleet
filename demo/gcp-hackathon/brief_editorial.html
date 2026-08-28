@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — Brief (editorial)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf7f0; --ink:#181812; --soft:#6a675e; --rule:#e6e1d5;
+    --mark:#ffe08a;         /* butter highlight for value / positive */
+    --markface:#1a1a12;
+    --accent:#2b6cff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#eceae3;font-family:"Space Grotesk",system-ui,-apple-system,Arial,sans-serif;
+    color:var(--ink);padding:32px 16px;-webkit-font-smoothing:antialiased}
+  .email{max-width:600px;margin:0 auto;background:var(--paper);border-radius:20px;padding:52px 48px 40px}
+
+  .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:44px}
+  .brand{font-weight:700;font-size:19px;letter-spacing:-.3px}
+  .meta{color:var(--soft);font-size:12px;font-weight:500;letter-spacing:.4px;text-transform:uppercase}
+
+  /* the headline carries the summary — no pills, just type */
+  .head{font-size:44px;line-height:1.08;font-weight:700;letter-spacing:-1.2px}
+  mark{background:linear-gradient(transparent 8%, var(--mark) 8% 88%, transparent 88%);
+    color:var(--markface);padding:0 .06em;border-radius:2px}
+  .head .ref{background:none;color:var(--soft)}
+  .lead{margin-top:18px;font-size:17px;line-height:1.5;color:var(--soft);font-weight:500;max-width:44ch}
+
+  .rule{height:1px;background:var(--rule);margin:40px 0}
+
+  .kicker{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--soft)}
+
+  /* worth doing — a big expressive number, generous space, a text link (not a button block) */
+  .num{font-size:64px;font-weight:700;letter-spacing:-2.5px;line-height:1;margin-top:14px}
+  .num small{font-size:19px;font-weight:600;color:var(--soft);letter-spacing:-.2px}
+  .say{margin-top:14px;font-size:18px;line-height:1.5;font-weight:500;max-width:46ch}
+  .links{margin-top:22px;font-size:16px;font-weight:600}
+  .links a{color:var(--accent);text-decoration:none;border-bottom:2px solid #2b6cff33;padding-bottom:1px}
+  .links a+a{margin-left:26px}
+
+  /* refused — no red boxes, just bold names + quiet reasons; highlight the walk-away */
+  .item{margin-top:26px}
+  .item .name{font-size:19px;font-weight:700;letter-spacing:-.3px}
+  .item .reason{margin-top:5px;font-size:16px;line-height:1.5;color:var(--soft);font-weight:500;max-width:48ch}
+
+  .ask{font-size:22px;line-height:1.4;font-weight:600;letter-spacing:-.4px;margin-top:14px;max-width:40ch}
+  .ask .cmd{background:var(--markface);color:var(--paper);padding:1px 9px;border-radius:6px;font-weight:700}
+
+  .foot{margin-top:44px;color:var(--soft);font-size:13px;font-weight:500;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+  <div class="email">
+    <div class="top">
+      <div class="brand">🦆 DuckFleet</div>
+      <div class="meta">Daily hunt · 22 Aug · simulation</div>
+    </div>
+
+    <div class="head">Checked <mark>3 offers</mark> overnight.<br>Kept one. Refused two.</div>
+    <div class="lead">Ran while you slept. Here's the one worth doing, the two I passed on, and the one thing I need your call on.</div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Worth doing</div>
+    <div class="num">16,800 <small>Qantas points</small></div>
+    <div class="say">About <mark>$173.84</mark> in value once I'd priced the round trip — 28 rubber ducks at BigW Mt Gravatt, 0.58c a point.</div>
+    <div class="links"><a href="#">Activate →</a><a href="#">Add a reminder</a></div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Refused, on purpose</div>
+    <div class="item">
+      <div class="name">90k Qantas points card · Westpac Altitude Black</div>
+      <div class="reason">You told me no new credit cards, so I let a <mark>$2,000</mark> offer walk past. That's the point.</div>
+    </div>
+    <div class="item">
+      <div class="name">$6 bath-toy 3-pack · Toy Outlet, Springfield</div>
+      <div class="reason">A real deal on paper. But an 80-minute round trip to save six dollars isn't one.</div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Waiting on you</div>
+    <div class="ask">Reply <span class="cmd">APPROVE</span> and I'll ring BigW Mt Gravatt to check stock. I'll tell them I'm an AI.</div>
+
+    <div class="foot">
+      <span>Cost $0.001 to run.</span>
+      <span>Reply STOP to pause the fleet.</span>
+    </div>
+  </div>
+</body>
+</html>

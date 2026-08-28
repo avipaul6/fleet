@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — Brief (dispatch)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#14140f;--paper:#f2efe4;--ink:#1a1a14;--soft:#8a8578;--line:#2a2a22;
+        --gold:#ffd54a;--green:#7bd88f;--dim:#b9b3a3}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:"Space Mono",ui-monospace,Menlo,monospace;color:#e9e6da;padding:32px 16px}
+  .email{max-width:600px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:40px 40px 32px}
+
+  .top{display:flex;justify-content:space-between;align-items:center;color:var(--soft);font-size:12px;letter-spacing:1px}
+  .top .brand{color:var(--gold);font-weight:700;letter-spacing:1px}
+  .dash{border:none;border-top:1px dashed var(--line);margin:22px 0}
+
+  .head{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:34px;line-height:1.15;
+    letter-spacing:-.5px;color:#fff;margin-top:26px}
+  .head .g{color:var(--gold)}
+  .lead{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.6;max-width:52ch}
+
+  .tag{font-size:11px;letter-spacing:3px;color:var(--soft);text-transform:uppercase}
+  .tag.go::before{content:"● ";color:var(--green)}
+  .tag.no::before{content:"● ";color:#e8756a}
+  .tag.wait::before{content:"● ";color:var(--gold)}
+
+  .block{margin-top:14px}
+  .num{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:52px;line-height:1;letter-spacing:-1.5px;color:#fff}
+  .num small{font-family:"Space Mono";font-size:14px;color:var(--soft);letter-spacing:0}
+  .say{margin-top:12px;font-size:14px;line-height:1.7;color:var(--dim);max-width:56ch}
+  .hl{background:var(--gold);color:#14140f;padding:1px 6px;font-weight:700;border-radius:3px}
+  .links{margin-top:18px;font-size:13px}
+  .links a{color:var(--gold);text-decoration:none;border-bottom:1px solid #ffd54a55}
+  .links a+a{margin-left:22px;color:var(--soft);border-bottom-color:var(--line)}
+
+  .item{margin-top:16px}
+  .item .name{color:#fff;font-size:15px;font-weight:700}
+  .item .reason{margin-top:4px;color:var(--dim);font-size:14px;line-height:1.65;max-width:58ch}
+  .item .reason .hl{font-weight:700}
+
+  .ask{margin-top:14px;font-family:"Space Grotesk",sans-serif;font-size:19px;line-height:1.5;color:#fff;max-width:48ch}
+  .cmd{background:var(--gold);color:#14140f;padding:2px 9px;font-family:"Space Mono";font-weight:700;font-size:15px;border-radius:4px}
+
+  .foot{margin-top:32px;color:var(--soft);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+  <div class="email">
+    <div class="top"><span class="brand">🦆 DUCKFLEET</span><span>DAILY HUNT · 22 AUG · SIMULATION</span></div>
+    <hr class="dash">
+
+    <div class="head">Checked <span class="g">3 offers</span> overnight.<br>Kept one. Refused two.</div>
+    <div class="lead">Ran while you slept. Below: what's worth doing, what I threw out, and the one thing i need your call on.</div>
+
+    <hr class="dash">
+
+    <div class="tag go">Worth doing</div>
+    <div class="block">
+      <div class="num">16,800 <small>QANTAS PTS</small></div>
+      <div class="say"><span class="hl">~$173.84</span> in value once I'd priced the round trip. 28 rubber ducks @ BigW Mt Gravatt, 0.58c/pt.</div>
+      <div class="links"><a href="#">Activate →</a><a href="#">Add a reminder</a></div>
+    </div>
+
+    <hr class="dash">
+
+    <div class="tag no">Refused, on purpose</div>
+    <div class="item">
+      <div class="name">90k Qantas card · Westpac Altitude Black</div>
+      <div class="reason">You said no new cards, so I let a <span class="hl">$2,000</span> offer walk past. That's the point.</div>
+    </div>
+    <div class="item">
+      <div class="name">$6 bath-toy 3-pack · Toy Outlet, Springfield</div>
+      <div class="reason">Real deal on paper, but an 80-min round trip to save six dollars isn't one.</div>
+    </div>
+
+    <hr class="dash">
+
+    <div class="tag wait">Waiting on you</div>
+    <div class="ask">Reply <span class="cmd">APPROVE</span> and I'll ring BigW Mt Gravatt to check stock. I'll tell them I'm an AI.</div>
+
+    <hr class="dash">
+    <div class="foot"><span>COST: $0.001 TO RUN</span><span>REPLY STOP TO PAUSE</span></div>
+  </div>
+</body>
+</html>

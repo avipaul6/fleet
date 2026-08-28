@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — Brief (improved mock)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a2e;--muted:#6b7280;--line:#e7e9ee;--bg:#f3f4f6;--card:#ffffff;
+    --green:#1a7f4b;--greenbg:#e7f6ee;--red:#c23b3b;--redbg:#fbecec;--amber:#b5730a;--amberbg:#fdf3e3;
+    --blue:#2b6cff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:"Nunito",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);padding:28px}
+  .email{max-width:600px;margin:0 auto;background:var(--card);border-radius:16px;padding:30px 32px;box-shadow:0 1px 3px #0000000f}
+  .hdr h1{font-size:26px;font-weight:900;display:flex;align-items:center;gap:10px}
+  .hdr .meta{color:var(--muted);font-size:13px;font-weight:700;margin-top:4px;letter-spacing:.3px}
+
+  /* decision summary strip — the reframe: a log of judgments, not a list of deals */
+  .summary{display:flex;gap:10px;margin:20px 0 6px}
+  .pill{flex:1;border-radius:12px;padding:12px 14px;font-weight:800;font-size:13px;text-align:center;border:1.5px solid}
+  .pill .n{display:block;font-size:22px;font-weight:900;line-height:1.1}
+  .pill.win{background:var(--greenbg);border-color:#bfe6cf;color:var(--green)}
+  .pill.ref{background:var(--redbg);border-color:#f2cccc;color:var(--red)}
+  .pill.ask{background:var(--amberbg);border-color:#f0dcae;color:var(--amber)}
+
+  .sect{margin-top:24px}
+  .sect .lbl{font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+
+  /* worth-doing card */
+  .pick{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:12px}
+  .pick .verdict{font-size:14px;font-weight:800;color:var(--green)}
+  .pick .big{font-size:30px;font-weight:900;margin-top:2px}
+  .pick .big small{font-size:15px;color:var(--muted);font-weight:800}
+  .pick .why{color:var(--ink);font-size:15px;margin-top:8px}
+  .pick .why b{font-weight:800}
+  .pick .row{display:flex;gap:10px;margin-top:14px}
+  .btn{border-radius:10px;padding:10px 16px;font-weight:800;font-size:14px;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--green);color:#fff}
+  .btn.ghost{background:#eef1ff;color:var(--blue)}
+
+  /* refused list — elevated, with what it walked away from */
+  .ref-item{border-left:3px solid #ecc;padding:10px 0 10px 14px;margin-top:12px}
+  .ref-item .t{font-weight:800;font-size:15px}
+  .ref-item .r{color:var(--muted);font-size:14px;margin-top:2px}
+  .ref-item .r b{color:var(--red);font-weight:800}
+
+  /* awaiting approval */
+  .ask-box{background:var(--amberbg);border:1.5px solid #f0dcae;border-radius:14px;padding:16px 18px;margin-top:12px}
+  .ask-box .t{font-weight:800;font-size:15px}
+  .ask-box .s{color:#7a5a15;font-size:14px;margin-top:4px}
+
+  .foot{margin-top:24px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:13px;font-weight:700;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+  <div class="email">
+    <div class="hdr">
+      <h1>🦆 DuckFleet — Daily Hunt</h1>
+      <div class="meta">22 Aug 2026 · SIMULATION · replay fixtures</div>
+    </div>
+
+    <!-- THE REFRAME: a decision summary, so it reads as judgment, not a deals list -->
+    <div class="summary">
+      <div class="pill win"><span class="n">1</span>worth doing</div>
+      <div class="pill ref"><span class="n">2</span>refused</div>
+      <div class="pill ask"><span class="n">1</span>needs your ok</div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">✅ Worth doing</div>
+      <div class="pick">
+        <div class="verdict">DO IT · nets $173.84 after I priced your drive</div>
+        <div class="big">16,800 <small>Qantas pts · ~$173.84 value</small></div>
+        <div class="why">28 rubber ducks @ <b>BigW Mt Gravatt</b>, 0.58c/pt. I checked the round-trip drive and it still clears $173 net.</div>
+        <div class="row">
+          <a class="btn primary" href="#">Activate / view ↗</a>
+          <a class="btn ghost" href="#">📅 Add reminder</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">⛔ Refused (and why)</div>
+      <div class="ref-item">
+        <div class="t">90k Qantas points card sign-up · Westpac Altitude Black</div>
+        <div class="r">You said no new credit cards, so I passed on it — <b>walked away from ~$2,000 in nominal value</b>. On purpose.</div>
+      </div>
+      <div class="ref-item">
+        <div class="t">$6 bath-toy 3-pack · Toy Outlet @ Springfield</div>
+        <div class="r">Technically a deal, but the <b>~80-min round trip costs more than it returns</b>. Not worth your Saturday.</div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="lbl">📞 Needs your ok</div>
+      <div class="ask-box">
+        <div class="t">Reply <b>APPROVE</b> and I'll call BigW Mt Gravatt to confirm stock.</div>
+        <div class="s">I'll open the call by saying I'm an AI calling on your behalf. One call, within store hours, logged.</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span>🧮 Cost me $0.001 of compute to run.</span>
+      <span>Reply STOP to pause the fleet.</span>
+    </div>
+  </div>
+</body>
+</html>

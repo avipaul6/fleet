@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DuckFleet — Brief (serif)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f7f4ec;--ink:#1b1915;--soft:#6f6a5f;--rule:#ddd6c6;--green:#1f6e4a;--gold:#a6791f;--accent:#1f6e4a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#e9e6dd;font-family:"Inter",system-ui,Arial,sans-serif;color:var(--ink);padding:32px 16px}
+  .email{max-width:600px;margin:0 auto;background:var(--paper);border-radius:6px;padding:54px 52px 42px}
+  .serif{font-family:"Fraunces","Georgia",serif}
+
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1.5px solid var(--ink);padding-bottom:12px;margin-bottom:38px}
+  .masthead .name{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:.2px}
+  .masthead .date{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--soft);font-weight:600}
+
+  .head{font-family:"Fraunces",serif;font-weight:600;font-size:42px;line-height:1.12;letter-spacing:-.5px}
+  .head em{font-style:italic;color:var(--green)}
+  .lead{margin-top:16px;font-size:16px;line-height:1.6;color:var(--soft);max-width:46ch}
+
+  .rule{height:1px;background:var(--rule);margin:36px 0}
+  .kicker{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--soft)}
+
+  .num{font-family:"Fraunces",serif;font-weight:600;font-size:60px;line-height:1;letter-spacing:-1px;margin-top:12px}
+  .num small{font-family:"Inter";font-size:17px;font-weight:500;color:var(--soft);letter-spacing:0}
+  .say{margin-top:12px;font-size:17px;line-height:1.6;max-width:48ch}
+  .say b{color:var(--green);font-weight:600}
+  .links{margin-top:20px;font-size:15px;font-weight:600}
+  .links a{color:var(--accent);text-decoration:none;border-bottom:1.5px solid var(--green)}
+  .links a+a{margin-left:24px;color:var(--soft);border-bottom-color:var(--rule)}
+
+  .item{margin-top:22px}
+  .item .name{font-family:"Fraunces",serif;font-size:20px;font-weight:600}
+  .item .reason{margin-top:4px;font-size:15px;line-height:1.6;color:var(--soft);max-width:50ch}
+  .item .reason b{color:var(--gold);font-weight:600}
+
+  .ask{font-family:"Fraunces",serif;font-size:23px;line-height:1.45;font-weight:500;margin-top:12px;max-width:42ch}
+  .ask u{text-decoration:none;border-bottom:2px solid var(--green);font-weight:600}
+
+  .foot{margin-top:42px;padding-top:14px;border-top:1px solid var(--rule);
+    color:var(--soft);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+  <div class="email">
+    <div class="masthead">
+      <div class="name">🦆 DuckFleet</div>
+      <div class="date">Daily Hunt · 22 Aug · Simulation</div>
+    </div>
+
+    <div class="head">A quiet, productive night. One find <em>worth doing</em>, two I set aside.</div>
+    <div class="lead">I went through the feeds while you slept. Here's the one thing that's worth your time, and the reasons I passed on the rest.</div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Worth doing</div>
+    <div class="num">16,800 <small>Qantas points</small></div>
+    <div class="say">Roughly <b>$173.84</b> in value after I priced the round trip — 28 rubber ducks at BigW Mt Gravatt, 0.58c a point.</div>
+    <div class="links"><a href="#">Activate</a><a href="#">Add a reminder</a></div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Set aside, on purpose</div>
+    <div class="item">
+      <div class="name">90k Qantas points card, Westpac Altitude Black</div>
+      <div class="reason">You asked me to avoid new credit cards, so I let a <b>$2,000</b> offer go by. That restraint is the whole idea.</div>
+    </div>
+    <div class="item">
+      <div class="name">$6 bath-toy 3-pack, Toy Outlet at Springfield</div>
+      <div class="reason">A genuine deal — but an 80-minute round trip to save six dollars isn't worth your Saturday.</div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="kicker">Waiting on you</div>
+    <div class="ask">Reply <u>APPROVE</u> and I'll call BigW Mt Gravatt to confirm stock. I'll open by saying I'm an AI, on your behalf.</div>
+
+    <div class="foot"><span>Cost $0.001 to run.</span><span>Reply STOP to pause the fleet.</span></div>
+  </div>
+</body>
+</html>
