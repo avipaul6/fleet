@@ -64,18 +64,16 @@ run's ROI). 18 red-team eval tests keep it honest — `python -m evals.run`.
 Every agent takes its model from config, resolved by `agents/model_factory.py`, across two
 tiers — **flash** (fast: scouts, worth-it, presenter) and **pro** (strong: valuer, caller):
 
-- Plain model id (e.g. `gemini-3.5-flash`) → native Gemini via ADK on Vertex AI.
+- Plain model id (e.g. `gemini-3.7-flash`) → native Gemini via ADK on Vertex AI.
 - `vertex_ai/...` prefix → wrapped in ADK's `LiteLlm`, still on **Vertex AI Model Garden** —
   so you can A/B Gemini vs Claude *without leaving GCP*, per tier, via env vars:
 
 ```bash
-export DUCKFLEET_MODEL_FAST="gemini-3.5-flash"    # flash tier
-export DUCKFLEET_MODEL_STRONG="gemini-3.5-flash"  # pro tier (swap to a 3.x Pro when available)
-# A/B the pro tier against Claude on Vertex:
-export DUCKFLEET_MODEL_STRONG="vertex_ai/claude-sonnet-4-5"
+export DUCKFLEET_MODEL_FAST="gemini-3.7-flash"    # flash tier
+export DUCKFLEET_MODEL_STRONG="gemini-3.7-flash"  # pro tier (swap to a 3.x Pro when available)
 ```
 
-Both tiers default to **Gemini 3.5 Flash** (the hackathon requires Gemini 3+). Rationale
+Both tiers default to **Gemini 3.7 Flash** . Rationale
 and model-choice notes live in [`devlog/`](devlog/).
 
 ---
