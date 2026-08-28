@@ -18,7 +18,7 @@ Deploy the fleet to your own Google Cloud project in **replay mode** (a determin
 brief, no secrets needed) and watch it produce a morning brief — a guided Cloud Shell
 walkthrough does the rest:
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/duckfleet/fleet&cloudshell_tutorial=runtimes/gcp_adk/tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/avipaul6/fleet&cloudshell_tutorial=runtimes/gcp_adk/tutorial.md)
 
 It runs on **your** Google Cloud, so you pay for your own usage — the Cloud Run Job scales
 to zero when idle and a nightly run costs cents. Add Gmail delivery, Twilio calls, or a

@@ -5,7 +5,7 @@ starting with the $3.50 rubber duck that was secretly a business-class seat.
 
 **Mascot:** 🦆 — keep it in the README and demo regardless of wordmark. The duck is the brand.
 
-**Repo:** github.com/duckfleet/fleet  ·  **Domain:** duckfleet.dev  ·  **Identity:** duckfleet.dev@gmail.com
+**Repo:** github.com/avipaul6/fleet  ·  **Domain:** duckfleet.dev  ·  **Identity:** duckfleet.dev@gmail.com
 
 ---
 
@@ -134,7 +134,7 @@ duckfleet/
 
 ## First tasks in Claude Code
 1. Add `.gitignore` (Python) + `LICENSE` (MIT). Commit the scaffold as first commit,
-   push to github.com/duckfleet/fleet.
+   push to github.com/avipaul6/fleet.
 2. Reshape into the repo map above: move ADK/Cloud-Run specifics under
    `runtimes/gcp_adk/`; keep agents/schemas/guardrails runtime-agnostic. Add
    `fixtures/` with the hero duck stack.

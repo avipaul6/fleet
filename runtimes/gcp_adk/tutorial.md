@@ -1,6 +1,6 @@
 # Deploy DuckFleet 🦆
 
-<walkthrough-author name="DuckFleet" repositoryUrl="https://github.com/duckfleet/fleet"></walkthrough-author>
+<walkthrough-author name="DuckFleet" repositoryUrl="https://github.com/avipaul6/fleet"></walkthrough-author>
 
 ## Welcome
 
